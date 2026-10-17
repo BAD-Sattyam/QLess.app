@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ export const Route = createFileRoute("/_authenticated/orders")({
 });
 
 function MyOrders() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const ordersQ = useQuery({
     queryKey: ["my-orders"],
     refetchInterval: 15_000,
@@ -43,12 +45,12 @@ function MyOrders() {
       </Link>
       <div className="mt-2 flex items-center justify-between">
         <h1 className="text-3xl font-semibold">My orders</h1>
-        <button
-          onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
+        <Button variant="ghost"
+          onClick={async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); await navigate({ to: "/auth", replace: true }); }}
           className="text-sm font-medium text-muted-foreground"
         >
           Sign out
-        </button>
+        </Button>
       </div>
 
       {ordersQ.isLoading && (

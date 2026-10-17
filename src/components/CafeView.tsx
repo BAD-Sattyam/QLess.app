@@ -91,7 +91,7 @@ export function CafeView({ slug }: { slug?: string }) {
             >
               {sessionQ.data ? "My orders" : "Sign in"}
             </Link>
-            <Link to="/auth" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <Link to="/staff/login" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
               Staff
             </Link>
           </div>
