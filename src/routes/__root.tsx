@@ -122,6 +122,13 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    // Legacy/default provider emails land at Site URL rather than the callback.
+    // Forward the original credentials once; the callback verifies and scrubs them.
+    const url = new URL(window.location.href);
+    const hash = new URLSearchParams(url.hash.slice(1));
+    if (url.pathname === "/" && (url.searchParams.has("code") || url.searchParams.has("token_hash") || url.searchParams.has("error") || hash.has("access_token") || hash.has("error"))) {
+      void router.navigate({ href: `/auth/callback${url.search}${url.hash}`, replace: true });
+    }
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();

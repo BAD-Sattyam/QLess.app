@@ -1,7 +1,8 @@
 # Email verification redirects
-- [ ] Inspect hosted provider and canonical URL; configure published-only email destinations or document unavailable hosted controls.
-- [ ] Add secure email callback and recovery completion without changing existing sign-in screens or roles.
-- [ ] Test callback rules and published availability; document manual configuration and publication blockers.
+- [x] Inspect hosted provider and canonical URL; published origin is already effective Site URL, both callback/reset destinations accepted; full allowlist editing unavailable through supported tools, documented in QLESS_EMAIL_REDIRECTS.md.
+- [x] Add secure email callback and recovery completion without changing existing sign-in screens or roles; forward legacy Site URL email returns.
+- [x] Test 12 callback/phone/staff rules and published availability; updated local return pages work, published callback/reset/staff pages return 404.
+- [ ] Complete fresh signup/invitation/reset inbox flows — blocked: publish updated app and open fresh provider emails; complete allowlist audit requires managed website settings not exposed by agent tools.
 
 # Academic demonstration completion
 - [x] Add partner entry points and secure staff/admin access; remove public first-admin claiming and staff signup.
