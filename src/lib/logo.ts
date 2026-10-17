@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export async function resolveLogoUrl(logo: string | null | undefined): Promise<string | null> {
   if (!logo) return null;
-  if (logo.startsWith("http")) return logo;
+  if (logo.startsWith("http") || logo.startsWith("/__l5e/")) return logo;
   const { data } = await supabase.storage.from("cafe-logos").createSignedUrl(logo, 86400);
   return data?.signedUrl ?? null;
 }
