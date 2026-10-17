@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
           p_pickup_at: attempt.pickup_at,
           p_items: attempt.items,
           p_client_hash: attempt.client_hash ?? "",
-          p_user_id: attempt.user_id ?? undefined,
+          ...(attempt.user_id ? { p_user_id: attempt.user_id } : {}),
         });
         if (error) {
           // Paid but order creation failed (e.g. slot filled while paying).
