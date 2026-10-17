@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Qless architecture
+- Payment status exposes provider-confirmed unpaid/authorized states without marking them failed or paid; an unpaid checkout can leave the waiting screen while its reservation expires normally. Why: stopped polling must not trap customers or fabricate payment confirmation.
 - Email verification returns use public `/auth/callback` and `/reset-password`, verify provider identity before navigation, and derive destinations from protected roles/memberships; canonical email links never use editor or preview origins. Why: email links must establish a session on the published origin without granting privileges from URL claims.
 - Customer `/auth` uses native Cloud Auth phone OTP; staff email authentication lives at `/staff/login`, partner entry points reuse it and the existing merchant dashboard; staff/admin routes check server-verified assignments/roles under the managed auth gate. Why: preserve existing screens while denying customers staff access.
 - Customer profile fields live in owner-scoped `public.profiles`, automatically created for new Auth users and backfilled for existing IDs. Why: preserve order ownership and keep privileges exclusively in the protected roles table.

@@ -50,7 +50,7 @@ function loadRazorpayScript(): Promise<boolean> {
 type PayState =
   | { phase: "idle" }
   | { phase: "starting" }
-  | { phase: "waiting"; attemptId: string; cancelled?: boolean }
+  | { phase: "waiting"; attemptId: string; cancelled?: boolean; checked?: boolean; providerStatus?: string }
   | { phase: "paid"; amount: number; trackingToken: string | null }
   | { phase: "failed"; reason: string };
 
@@ -68,6 +68,7 @@ function Checkout() {
   const [hp, setHp] = useState("");
   const [slot, setSlot] = useState<string | null>(null);
   const [pay, setPay] = useState<PayState>({ phase: "idle" });
+  const [checkingPayment, setCheckingPayment] = useState(false);
   const sessionQ = useQuery({
     queryKey: ["session-user"],
     queryFn: async () => (await supabase.auth.getUser()).data.user,
@@ -97,6 +98,7 @@ function Checkout() {
   const waitForPayment = async (attemptId: string) => {
     if (polling.current) return;
     polling.current = true;
+    setCheckingPayment(true);
     try {
       for (let i = 0; i < 20; i++) {
         const res = await pollStatus({ data: { attemptId } });
@@ -112,10 +114,14 @@ function Checkout() {
           qc.invalidateQueries({ queryKey: ["slots"] });
           return;
         }
+        setPay((current) => current.phase === "waiting" && current.attemptId === attemptId ? { ...current, checked: true, providerStatus: res.providerStatus } : current);
+        // An unopened/dismissed checkout has no provider payment to confirm.
+        // Keep the reservation pending for webhook races, but do not trap the customer.
+        if (res.providerStatus === "no_payment") return;
         await new Promise((r) => setTimeout(r, 3000));
       }
     } catch { toast.error("Couldn't check payment yet. Please check again."); }
-    finally { polling.current = false; }
+    finally { polling.current = false; setCheckingPayment(false); }
   };
 
   useEffect(() => {
@@ -286,12 +292,13 @@ function Checkout() {
 
       {pay.phase === "waiting" && (
         <div className="mt-4 rounded-2xl border border-warning/60 bg-warning/20 p-4 text-sm">
-          <p className="font-semibold">{pay.cancelled ? "Checkout closed — confirmation pending" : "Confirming test payment"}</p>
+          <p className="font-semibold">{pay.providerStatus === "no_payment" ? "Test payment not completed" : pay.providerStatus === "authorized" ? "Payment authorized — capture pending" : pay.cancelled ? "Checkout closed — confirmation pending" : checkingPayment ? "Confirming test payment" : "Payment confirmation pending"}</p>
           <p className="mt-1 text-muted-foreground">
-            We are checking captured payment status with Razorpay. Closing checkout does not confirm failure. Unpaid reservations expire after 15 minutes.
+            {pay.providerStatus === "no_payment" ? "Razorpay has not received a payment for this checkout. No demo order has been created. You can return to checkout; the unpaid reservation expires after 15 minutes." : pay.providerStatus === "authorized" ? "Razorpay has authorized the test payment but has not captured it yet. No demo order is confirmed. Check again after capture; do not pay again." : "Payment has not yet been confirmed as captured. Check again to refresh its status. Closing checkout does not confirm failure. Unpaid reservations expire after 15 minutes."}
           </p>
           <div className="mt-3 flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => void waitForPayment(pay.attemptId)}>Check payment</Button>
+            <Button size="sm" variant="outline" disabled={checkingPayment} onClick={() => void waitForPayment(pay.attemptId)}>{checkingPayment ? "Checking…" : "Check payment"}</Button>
+            {pay.providerStatus === "no_payment" && <Button size="sm" variant="outline" onClick={() => { sessionStorage.removeItem("qless-pending-payment"); setSlot(null); setPay({ phase: "idle" }); }}>Return to checkout</Button>}
           </div>
         </div>
       )}
@@ -321,7 +328,7 @@ function Checkout() {
         </div>
         <Button size="lg" disabled={busy} onClick={onPay} className="h-14 w-full rounded-2xl text-base">
           <CreditCard className="size-5" />
-           {pay.phase === "starting" ? "Starting test payment…" : pay.phase === "waiting" ? "Waiting for confirmation…" : pay.phase === "paid" ? "Test payment verified" : `Test pay ${formatINR(cart.subtotal)}`}
+           {pay.phase === "starting" ? "Starting test payment…" : pay.phase === "waiting" ? pay.providerStatus === "no_payment" ? "Test payment not completed" : checkingPayment ? "Checking confirmation…" : "Confirmation pending" : pay.phase === "paid" ? "Test payment verified" : `Test pay ${formatINR(cart.subtotal)}`}
         </Button>
       </div>
     </div>
