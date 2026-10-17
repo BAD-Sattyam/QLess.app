@@ -43,6 +43,13 @@
       "when": 1792239306469,
       "tag": "0005_prepaid_marketplace",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792240798695,
+      "tag": "0006_razorpay_test_safety",
+      "breakpoints": true
     }
   ]
 }
