@@ -1,8 +1,9 @@
 # Academic demonstration completion
-- [ ] Add partner entry points and secure staff/admin access; remove public first-admin claiming.
-- [ ] Turn captured, verified test receipts into clearly labelled persisted demonstration orders with tracking.
-- [ ] Verify access controls, transitions, persistence and payment failure safeguards; document honest setup blockers.
-- [ ] Provision requested initial administrator and assigned demonstration staff through secure existing tools.
+- [x] Add partner entry points and secure staff/admin access; remove public first-admin claiming and staff signup.
+- [x] Implement atomic captured-test-payment → labelled demo order and tracking; preserve demo/unapproved flags and live-key rejection.
+- [x] Run 22 regression tests; verify real signed-in customer denial, menu/cart/slots and Razorpay Test Mode opening. Recheck grants/RLS and document blockers in QLESS_DEMO_READINESS.md.
+- [ ] Verify captured payment → persisted demo order → assigned staff transitions → tracking and duplicate/expiry provider tests — blocked: Razorpay requires an accepted sandbox contact; no captured payments or assigned staff exist.
+- [ ] Provision requested initial administrator and assigned demonstration staff — blocked: owner must create/confirm the designated email in secure Users → Add user; no separate staff email supplied. Verified-email bootstrap implemented but not exercised.
 
 # Customer mobile sign-in
 - [x] Add Indian phone / six-digit OTP interface with resend/error states and native Auth calls (no local OTP fallback).
