@@ -42,6 +42,11 @@ export function CafeView({ slug }: { slug?: string }) {
   });
   const cart = useCart();
   const [selected, setSelected] = useState<MenuItem | null>(null);
+  const sessionQ = useQuery({
+    queryKey: ["session-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    staleTime: 60_000,
+  });
 
   const grouped = useMemo(() => {
     const map = new Map<string, MenuItem[]>();
