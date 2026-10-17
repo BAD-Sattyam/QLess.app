@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const orderSchema = z.object({
   cafeId: z.string().uuid(),
@@ -28,8 +29,9 @@ async function sha256(input: string) {
 }
 
 export const placeOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => orderSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const ip =
       getRequestHeader("cf-connecting-ip") ??
       getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -45,6 +47,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       p_pickup_at: data.pickupAt,
       p_items: data.items,
       p_client_hash: clientHash,
+      p_user_id: context.userId,
     });
     if (error) return { ok: false as const, error: error.message };
     const row = Array.isArray(rows) ? rows[0] : rows;
