@@ -42,6 +42,11 @@ export function CafeView({ slug }: { slug?: string }) {
   });
   const cart = useCart();
   const [selected, setSelected] = useState<MenuItem | null>(null);
+  const sessionQ = useQuery({
+    queryKey: ["session-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    staleTime: 60_000,
+  });
 
   const grouped = useMemo(() => {
     const map = new Map<string, MenuItem[]>();
@@ -72,9 +77,17 @@ export function CafeView({ slug }: { slug?: string }) {
           <span className="rounded-full bg-card/90 px-3 py-1 text-sm font-semibold text-primary backdrop-blur">
             Qless
           </span>
-          <Link to="/auth" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            Staff
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              to={sessionQ.data ? "/orders" : "/auth"}
+              className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-primary backdrop-blur"
+            >
+              {sessionQ.data ? "My orders" : "Sign in"}
+            </Link>
+            <Link to="/auth" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+              Staff
+            </Link>
+          </div>
         </div>
       </header>
 

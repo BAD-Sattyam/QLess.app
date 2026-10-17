@@ -208,6 +208,7 @@ export type Database = {
           status: Database["public"]["Enums"]["order_status"]
           total_paise: number
           tracking_token: string
+          user_id: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -227,6 +228,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_paise?: number
           tracking_token: string
+          user_id?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -246,6 +248,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_paise?: number
           tracking_token?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -322,6 +325,7 @@ export type Database = {
           p_items: Json
           p_notes: string
           p_pickup_at: string
+          p_user_id?: string
         }
         Returns: {
           pickup_code: string

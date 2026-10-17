@@ -40,6 +40,11 @@ function Checkout() {
   const [hp, setHp] = useState("");
   const [slot, setSlot] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const sessionQ = useQuery({
+    queryKey: ["session-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    staleTime: 60_000,
+  });
 
   const cafeQ = useQuery({
     enabled: !!cart.cafeId,
@@ -62,6 +67,20 @@ function Checkout() {
       <div className="mx-auto max-w-xl">
         <Empty title="Your cart is empty" body="Add a coffee or a snack to get started." />
         <div className="text-center"><Button asChild size="lg" className="rounded-full"><Link to="/">Browse menu</Link></Button></div>
+      </div>
+    );
+  }
+
+  if (sessionQ.data === null) {
+    return (
+      <div className="mx-auto max-w-xl px-4 pt-16 text-center">
+        <h1 className="text-3xl font-semibold">Sign in to place your order</h1>
+        <p className="mt-2 text-muted-foreground">
+          Your cart is saved. Sign in or create a free account to place the order and track it live.
+        </p>
+        <Button asChild size="lg" className="mt-6 h-12 rounded-full px-8 text-base">
+          <Link to="/auth" search={{ redirect: "/checkout" }}>Sign in or create account</Link>
+        </Button>
       </div>
     );
   }
