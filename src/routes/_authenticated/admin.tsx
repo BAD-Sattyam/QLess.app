@@ -57,7 +57,7 @@ function AdminPage() {
 }
 
 type Cafe = Tables<"cafes">;
-const emptyCafe = { slug: "", name: "", tagline: "", address: "", open_time: "08:00", close_time: "20:00", lead_time_minutes: 10, avg_prep_minutes: 8, max_orders_per_slot: 6, accepting_orders: true, is_active: true };
+const emptyCafe = { slug: "", name: "", tagline: "", address: "", cuisine: "", open_time: "08:00", close_time: "20:00", lead_time_minutes: 10, avg_prep_minutes: 8, max_orders_per_slot: 6, accepting_orders: true, is_active: true, approved: false };
 
 function CafesTab({ cafes }: { cafes: Cafe[] }) {
   const qc = useQueryClient();
@@ -90,9 +90,11 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
     if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) { toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required"); return; }
     const payload = {
       slug: edit.slug, name: edit.name.trim(), tagline: edit.tagline || null, address: edit.address.trim(),
+      cuisine: edit.cuisine?.trim() || null,
       open_time: edit.open_time, close_time: edit.close_time,
       lead_time_minutes: Number(edit.lead_time_minutes), avg_prep_minutes: Number(edit.avg_prep_minutes),
       max_orders_per_slot: Number(edit.max_orders_per_slot), accepting_orders: edit.accepting_orders, is_active: edit.is_active,
+      approved: edit.approved,
     };
     const { error } = edit.id ? await supabase.from("cafes").update(payload).eq("id", edit.id) : await supabase.from("cafes").insert(payload);
     if (error) { toast.error(error.message); return; }
