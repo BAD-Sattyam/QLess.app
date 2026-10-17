@@ -215,6 +215,7 @@ export type Database = {
           created_at: string
           customer_name: string
           id: string
+          is_demo: boolean
           notes: string | null
           payment_ref: string | null
           pickup_at: string
@@ -236,6 +237,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           id?: string
+          is_demo?: boolean
           notes?: string | null
           payment_ref?: string | null
           pickup_at: string
@@ -257,6 +259,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           id?: string
+          is_demo?: boolean
           notes?: string | null
           payment_ref?: string | null
           pickup_at?: string
