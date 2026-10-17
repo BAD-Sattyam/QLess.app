@@ -1,3 +1,8 @@
+# Email verification redirects
+- [ ] Inspect hosted provider and canonical URL; configure published-only email destinations or document unavailable hosted controls.
+- [ ] Add secure email callback and recovery completion without changing existing sign-in screens or roles.
+- [ ] Test callback rules and published availability; document manual configuration and publication blockers.
+
 # Academic demonstration completion
 - [x] Add partner entry points and secure staff/admin access; remove public first-admin claiming and staff signup.
 - [x] Implement atomic captured-test-payment → labelled demo order and tracking; preserve demo/unapproved flags and live-key rejection.
