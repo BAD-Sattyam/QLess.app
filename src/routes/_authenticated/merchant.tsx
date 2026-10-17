@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getStaffAccess } from "@/lib/staff-access.functions";
+import { canAccessStaff } from "@/lib/staff-access";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +18,9 @@ import type { Database } from "@/integrations/supabase/types";
 type Status = Database["public"]["Enums"]["order_status"];
 
 export const Route = createFileRoute("/_authenticated/merchant")({
+  beforeLoad: async () => {
+    if (!canAccessStaff(await getStaffAccess())) throw redirect({ to: "/staff/login", search: { redirect: "/merchant" } });
+  },
   head: () => ({
     meta: [
       { title: "Orders — Qless staff" },
@@ -37,7 +42,9 @@ function MerchantPage() {
     queryKey: ["staff-cafes", me.data?.isAdmin, me.data?.cafeIds],
     queryFn: async () => {
       let q = supabase.from("cafes").select("*").order("name");
-      if (!me.data!.isAdmin) q = q.in("id", me.data!.cafeIds.length ? me.data!.cafeIds : ["00000000-0000-0000-0000-000000000000"]);
+      const staff = me.data;
+      if (!staff) return [];
+      if (!staff.isAdmin) q = q.in("id", staff.cafeIds.length ? staff.cafeIds : ["00000000-0000-0000-0000-000000000000"]);
       return (await q).data ?? [];
     },
   });
@@ -55,20 +62,13 @@ function MerchantPage() {
         <div className="mx-auto max-w-md py-16 text-center">
           <h1 className="text-2xl font-semibold">No café access yet</h1>
           <p className="mt-2 text-muted-foreground">Signed in as {me.data?.email}. Ask the Qless admin to assign you to a café.</p>
-          {me.data && !me.data.adminExists && (
-            <Button className="mt-6 rounded-full" size="lg" onClick={async () => {
-              const { error } = await supabase.rpc("claim_first_admin");
-              if (error) { toast.error(error.message); return; }
-              toast.success("You are now the admin");
-              qc.invalidateQueries();
-            }}>Set me up as the first admin</Button>
-          )}
         </div>
       </StaffShell>
     );
   }
 
-  const cafe = cafesQ.data.find((c) => c.id === cafeId) ?? cafesQ.data[0]!;
+  const cafe = cafesQ.data.find((c) => c.id === cafeId) ?? cafesQ.data[0];
+  if (!cafe) return null;
   return (
     <StaffShell active="orders">
       {cafesQ.data.length > 1 && (
@@ -86,6 +86,7 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
   const ordersKey = ["orders", cafe.id];
   const ordersQ = useQuery({
     queryKey: ordersKey,
+    refetchInterval: 8000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
@@ -131,8 +132,10 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
   const stats = useMemo(() => {
     const valid = orders.filter((o) => o.status !== "cancelled");
     const preps = valid
-      .filter((o) => o.ready_at && (o.preparing_at || o.accepted_at))
-      .map((o) => (new Date(o.ready_at!).getTime() - new Date((o.preparing_at ?? o.accepted_at)!).getTime()) / 60000);
+      .flatMap((o) => {
+        const start = o.preparing_at ?? o.accepted_at;
+        return o.ready_at && start ? [(new Date(o.ready_at).getTime() - new Date(start).getTime()) / 60000] : [];
+      });
     return {
       count: valid.length,
       value: valid.reduce((n, o) => n + o.total_paise, 0),
@@ -160,6 +163,7 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
         <Stat label="Order value" value={formatINR(stats.value)} />
         <Stat label="Avg prep" value={stats.avgPrep == null ? "—" : `${stats.avgPrep} min`} />
       </div>
+      {cafe.demo_mode && <p className="mt-4 text-sm font-semibold text-muted-foreground">Academic demonstration only · no real kitchen fulfillment or money collected.</p>}
 
       <Tabs defaultValue="active" className="mt-5">
         <TabsList className="h-12 w-full">
@@ -208,7 +212,7 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
           </div>
           <Textarea value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} placeholder="Reason shown to the customer" />
           <DialogFooter>
-            <Button variant="destructive" size="lg" disabled={reason.trim().length < 2} onClick={async () => { await act(cancelId!, "cancelled", reason); setCancelId(null); }}>
+            <Button variant="destructive" size="lg" disabled={reason.trim().length < 2} onClick={async () => { if (!cancelId) return; await act(cancelId, "cancelled", reason); setCancelId(null); }}>
               Cancel order
             </Button>
           </DialogFooter>
@@ -264,7 +268,7 @@ function OrderCard({ o, act, onCancel }: { o: OrderRow; act: (id: string, s: Sta
       </ul>
       {o.notes && <p className="mt-2 rounded-lg bg-warning/25 p-2 text-sm"><strong>Note:</strong> {o.notes}</p>}
       {o.cancel_reason && <p className="mt-2 text-sm text-destructive">Cancelled: {o.cancel_reason}</p>}
-      <p className="mt-2 text-sm font-semibold">Collect {formatINR(o.total_paise)} at pickup</p>
+      <p className="mt-2 text-sm font-semibold">{o.is_demo ? "DEMO · verified test payment" : o.payment_ref ? "Paid online" : "Payment unverified"} · {formatINR(o.total_paise)}</p>
       {next && (
         <div className="mt-3 flex gap-2">
           <Button size="lg" className="h-12 flex-1 rounded-xl text-base" onClick={() => act(o.id, next.to)}>{next.label}</Button>

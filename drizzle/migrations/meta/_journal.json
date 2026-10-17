@@ -64,6 +64,20 @@
       "when": 1792247918861,
       "tag": "0008_customer_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792248939492,
+      "tag": "0009_academic_demo_fulfillment",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792249061957,
+      "tag": "0010_demo_staff_provisioning_and_grants",
+      "breakpoints": true
     }
   ]
 }

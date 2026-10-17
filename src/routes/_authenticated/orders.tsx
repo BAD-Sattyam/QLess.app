@@ -30,7 +30,7 @@ function MyOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, tracking_token, pickup_code, status, total_paise, pickup_at, created_at, cafes(name)")
+        .select("id, tracking_token, pickup_code, status, total_paise, pickup_at, created_at, is_demo, cafes(name)")
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -88,7 +88,7 @@ function MyOrders() {
                   Pickup {new Date(o.pickup_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                   {" · "}Code {o.pickup_code}
                 </span>
-                <span className="font-semibold text-foreground">{formatINR(o.total_paise)}</span>
+                <span className="font-semibold text-foreground">{o.is_demo ? "DEMO · " : ""}{formatINR(o.total_paise)}</span>
               </div>
             </Link>
           </li>

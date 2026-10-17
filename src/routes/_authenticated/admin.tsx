@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getStaffAccess } from "@/lib/staff-access.functions";
+import { canAccessStaff } from "@/lib/staff-access";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Trash2, Upload } from "lucide-react";
@@ -18,6 +20,9 @@ import { formatINR } from "@/lib/pricing";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  beforeLoad: async () => {
+    if (!canAccessStaff(await getStaffAccess(), true)) throw redirect({ to: "/staff/login", search: { redirect: "/admin" } });
+  },
   head: () => ({
     meta: [
       { title: "Admin — Qless" },

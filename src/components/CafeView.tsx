@@ -105,7 +105,7 @@ export function CafeView({ slug }: { slug?: string }) {
         <h1 className="text-3xl font-semibold text-foreground">{cafe.name}</h1>
         {cafe.demo_mode && (
           <p className="mt-2 rounded-xl border border-accent/50 bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground">
-            Demonstration outlet on Qless — menu, prices and hours are provisional and pending the café's confirmation. Ordering is disabled in demo mode.
+            Demonstration outlet on Qless — menu, prices and hours are provisional and pending the café's confirmation. Academic test orders only after verified test payment. No real fulfillment or official partnership.
           </p>
         )}
         {cafe.tagline && <p className="mt-1 text-muted-foreground">{cafe.tagline}</p>}

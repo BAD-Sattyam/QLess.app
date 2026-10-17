@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Qless architecture
-- Customer `/auth` uses native Cloud Auth phone OTP; staff email authentication lives at `/staff/login` and existing protected dashboards retain their server authorization. Why: phone identity is provider-verified and staff access must not depend on customer UI.
+- Customer `/auth` uses native Cloud Auth phone OTP; staff email authentication lives at `/staff/login`, partner entry points reuse it and the existing merchant dashboard; staff/admin routes check server-verified assignments/roles under the managed auth gate. Why: preserve existing screens while denying customers staff access.
 - Customer profile fields live in owner-scoped `public.profiles`, automatically created for new Auth users and backfilled for existing IDs. Why: preserve order ownership and keep privileges exclusively in the protected roles table.
 - Existing email-to-phone transitions require administrator identity verification and linking on the existing Auth ID before phone signup; never auto-merge by phone/name. Why: prevent account takeover and duplicate ownership.
 - OTP resend UI is a convenience only; native Auth controls issue/verification limits and SMS credentials. Why: bypassable browser timers must not be presented as security throttling.
@@ -21,9 +21,10 @@
 - Customers must sign in to place orders: `placeOrder` uses requireSupabaseAuth and stamps orders.user_id; guests can browse but checkout shows a sign-in gate. Why: customer accounts with order history at /orders.
 - Customers read their own orders via RLS (orders.user_id = auth.uid()); the token-based get_order_by_token path still works for tracking links. Why: private order data, shareable tracking.
 - Cafés have a demo_mode flag: place_order rejects demo cafés and the café page shows a provisional-details badge. Why: demo outlets must not take real orders until the merchant confirms menu, hours and staff.
-- Checkout uses service-only `create_test_payment_attempt` for validated, expiring reservations; `finalize_test_payment` locks each attempt and records a unique captured receipt atomically. Why: duplicate callbacks cannot create duplicate payments, and test receipts never enter the preparation queue.
+- Checkout uses service-only `create_test_payment_attempt` for validated, expiring reservations; `finalize_test_payment` locks each attempt and records a unique captured receipt atomically, creating an `is_demo` order only for a demo outlet, timely capture and future pickup; ordinary test receipts stay order-free. Why: retries cannot duplicate demonstration fulfillment and no live orders are created.
 - Razorpay provider calls live in `razorpay.server.ts`, shared signature/capture rules in `payment-security.ts`, and authenticated RPC wrappers in `payments.functions.ts`. Why: private credentials stay server-only and browser callbacks are never trusted alone.
-- Missing or non-test Razorpay credentials block checkout before reserving slots; verified test receipts never create orders. Why: prevent unintended live collection and preserve demo authorization restrictions.
+- Missing or non-test Razorpay credentials block checkout before reserving slots; demo order labels must appear in staff, history and tracking surfaces. Why: prevent unintended live collection and confusion with real restaurant fulfillment.
+- Initial administrator assignment uses a lifecycle trigger for the owner's explicitly designated verified email, serialized before assigning the first role; `claim_first_admin` is disabled and staff login has no public signup. Why: managed Add user can securely bootstrap the owner without permitting arbitrary customers to promote themselves.
 - Managed payment expiry callbacks reconcile a bounded batch and expire pending attempts; slot queries independently exclude elapsed reservations. Why: abandoned checkouts release capacity even if scheduled delivery is delayed.
 - Restaurant pages live at /restaurant/$slug; /cafe/$slug redirects. Homepage / is the discovery list; demo/unapproved cafés are badged and cannot take orders.
 - Scope discovery-page theme overrides under `.qless-home` in the global stylesheet; why: homepage visual changes must not restyle restaurant, checkout, or staff screens.
