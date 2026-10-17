@@ -2,9 +2,9 @@
 
 ## Required hosted setup
 
-Hosted public Auth settings were read successfully during implementation: **phone sign-in is currently disabled**, **email sign-in is enabled**, and **signup is enabled**. No SMS delivery or OTP completion is available until phone/provider setup is finished.
+Hosted public Auth settings were read during implementation: **phone sign-in is disabled**, **email sign-in is enabled**, **signup is enabled**; Google and Lovable providers were enabled in a later change. No SMS delivery or OTP completion is available until phone/provider setup is finished.
 
-Customer `/auth` now uses Cloud Auth `signInWithOtp` and `verifyOtp` with Indian +91 numbers. Staff email/password sign-in remains at `/staff/login`; email auth stays enabled. Public signup remains enabled and anonymous signup stays disabled. Successful phone verification uses the existing persisted Auth session and owner-scoped order access. Sending a code is not treated as a signed-in session.
+Customer `/auth` offers email/password, Google and Lovable sign-in, and keeps the Cloud Auth `signInWithOtp`/`verifyOtp` mobile flow as a third method. Staff email/password sign-in remains at `/staff/login`. Public signup remains enabled and anonymous signup stays disabled. Successful phone verification uses the existing persisted Auth session and owner-scoped order access. Sending a code is not treated as a signed-in session.
 
 Open **More → Users → Auth settings → Phone settings**:
 
