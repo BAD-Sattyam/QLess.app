@@ -118,6 +118,15 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               <F label="URL slug"><Input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value.toLowerCase() })} /></F>
               <F label="Tagline"><Input value={edit.tagline ?? ""} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></F>
               <F label="Address"><Textarea value={edit.address} onChange={(e) => setEdit({ ...edit, address: e.target.value })} /></F>
+              <F label="Logo">
+                <div className="flex items-center gap-3">
+                  {logoQ.data && <img src={logoQ.data} alt="Café logo" className="h-12 w-auto max-w-32 rounded-lg border bg-card object-contain p-1" />}
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ""; }} />
+                  <Button type="button" variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
+                    <Upload className="size-4" /> {uploading ? "Uploading…" : edit.logo_url ? "Change logo" : "Upload logo"}
+                  </Button>
+                </div>
+              </F>
               <div className="grid grid-cols-2 gap-3">
                 <F label="Opens (IST)"><Input type="time" value={edit.open_time} onChange={(e) => setEdit({ ...edit, open_time: e.target.value })} /></F>
                 <F label="Closes (IST)"><Input type="time" value={edit.close_time} onChange={(e) => setEdit({ ...edit, close_time: e.target.value })} /></F>
