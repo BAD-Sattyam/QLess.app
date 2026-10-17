@@ -18,8 +18,10 @@ import { Route as AuthenticatedMerchantRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as CafeSlugRouteImport } from './routes/cafe.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
+import { Route as PartnerLoginRouteImport } from './routes/partner/login'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
 import { Route as StaffLoginRouteImport } from './routes/staff/login'
+import { Route as AuthenticatedPartnerDashboardRouteImport } from './routes/_authenticated/partner/dashboard'
 import { Route as ApiPublicPaymentsExpireRouteImport } from './routes/api/public/payments-expire'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
@@ -67,6 +69,11 @@ const OrderTokenRoute = OrderTokenRouteImport.update({
   path: '/order/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerLoginRoute = PartnerLoginRouteImport.update({
+  id: '/partner/login',
+  path: '/partner/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RestaurantSlugRoute = RestaurantSlugRouteImport.update({
   id: '/restaurant/$slug',
   path: '/restaurant/$slug',
@@ -77,6 +84,12 @@ const StaffLoginRoute = StaffLoginRouteImport.update({
   path: '/staff/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPartnerDashboardRoute =
+  AuthenticatedPartnerDashboardRouteImport.update({
+    id: '/partner/dashboard',
+    path: '/partner/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsExpireRoute = ApiPublicPaymentsExpireRouteImport.update({
   id: '/api/public/payments-expire',
   path: '/api/public/payments-expire',
@@ -98,8 +111,10 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
+  '/partner/login': typeof PartnerLoginRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/staff/login': typeof StaffLoginRoute
+  '/partner/dashboard': typeof AuthenticatedPartnerDashboardRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -112,8 +127,10 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
+  '/partner/login': typeof PartnerLoginRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/staff/login': typeof StaffLoginRoute
+  '/partner/dashboard': typeof AuthenticatedPartnerDashboardRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -128,8 +145,10 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
+  '/partner/login': typeof PartnerLoginRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
   '/staff/login': typeof StaffLoginRoute
+  '/_authenticated/partner/dashboard': typeof AuthenticatedPartnerDashboardRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -144,8 +163,10 @@ export interface FileRouteTypes {
     | '/orders'
     | '/cafe/$slug'
     | '/order/$token'
+    | '/partner/login'
     | '/restaurant/$slug'
     | '/staff/login'
+    | '/partner/dashboard'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -158,8 +179,10 @@ export interface FileRouteTypes {
     | '/orders'
     | '/cafe/$slug'
     | '/order/$token'
+    | '/partner/login'
     | '/restaurant/$slug'
     | '/staff/login'
+    | '/partner/dashboard'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   id:
@@ -173,8 +196,10 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/cafe/$slug'
     | '/order/$token'
+    | '/partner/login'
     | '/restaurant/$slug'
     | '/staff/login'
+    | '/_authenticated/partner/dashboard'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
@@ -186,6 +211,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   CafeSlugRoute: typeof CafeSlugRoute
   OrderTokenRoute: typeof OrderTokenRoute
+  PartnerLoginRoute: typeof PartnerLoginRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
   StaffLoginRoute: typeof StaffLoginRoute
   ApiPublicPaymentsExpireRoute: typeof ApiPublicPaymentsExpireRoute
@@ -257,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner/login': {
+      id: '/partner/login'
+      path: '/partner/login'
+      fullPath: '/partner/login'
+      preLoaderRoute: typeof PartnerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/restaurant/$slug': {
       id: '/restaurant/$slug'
       path: '/restaurant/$slug'
@@ -270,6 +303,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/staff/login'
       preLoaderRoute: typeof StaffLoginRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/partner/dashboard': {
+      id: '/_authenticated/partner/dashboard'
+      path: '/partner/dashboard'
+      fullPath: '/partner/dashboard'
+      preLoaderRoute: typeof AuthenticatedPartnerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/payments-expire': {
       id: '/api/public/payments-expire'
@@ -292,12 +332,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMerchantRoute: typeof AuthenticatedMerchantRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
+  AuthenticatedPartnerDashboardRoute: typeof AuthenticatedPartnerDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMerchantRoute: AuthenticatedMerchantRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
+  AuthenticatedPartnerDashboardRoute: AuthenticatedPartnerDashboardRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -310,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   CafeSlugRoute: CafeSlugRoute,
   OrderTokenRoute: OrderTokenRoute,
+  PartnerLoginRoute: PartnerLoginRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
   StaffLoginRoute: StaffLoginRoute,
   ApiPublicPaymentsExpireRoute: ApiPublicPaymentsExpireRoute,
