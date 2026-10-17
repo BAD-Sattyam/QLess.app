@@ -7,6 +7,9 @@
 @theme inline {
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Manrope", system-ui, sans-serif;
+  --color-home-hero: var(--home-hero);
+  --color-home-highlight: var(--home-highlight);
+  --color-home-photo-label: var(--home-photo-label);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -121,3 +124,49 @@
 @utility shadow-bar {
   box-shadow: var(--shadow-bar);
 }
+
+/* Customer discovery theme is scoped to preserve the café and staff screens. */
+.qless-home {
+  --background: oklch(0.985 0.004 75);
+  --foreground: oklch(0.21 0.014 330);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --primary: oklch(0.55 0.21 28);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.018 65);
+  --secondary-foreground: oklch(0.37 0.035 35);
+  --muted: oklch(0.95 0.006 75);
+  --muted-foreground: oklch(0.48 0.012 330);
+  --accent: oklch(0.95 0.035 30);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.92 0.007 65);
+  --input: var(--border);
+  --ring: var(--primary);
+  --success: oklch(0.43 0.11 155);
+  --home-hero: oklch(0.7 0.2 26);
+  --home-highlight: oklch(0.93 0.16 100);
+  --home-photo-label: oklch(0.26 0.025 30);
+  --shadow-home-search: 0 8px 28px -8px color-mix(in oklab, var(--foreground) 16%, transparent);
+  --shadow-home-card: 0 5px 20px -8px color-mix(in oklab, var(--foreground) 12%, transparent);
+  font-family: var(--font-sans);
+}
+.qless-home :is(h1, h2, h3) { font-family: var(--font-sans); letter-spacing: 0; }
+.home-hero-photo { object-position: center; }
+.home-restaurant { transition: transform 220ms ease, box-shadow 220ms ease; }
+.home-category { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.home-category:active, .home-restaurant:active { transform: scale(0.985); }
+.home-search { transition: box-shadow 180ms ease; }
+.home-search:focus-within { box-shadow: 0 8px 28px -8px color-mix(in oklab, var(--primary) 30%, transparent); }
+@media (min-width: 640px) {
+  .home-hero-photo { object-position: center 47%; }
+}
+@media (hover: hover) {
+  .home-restaurant:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -10px color-mix(in oklab, var(--foreground) 20%, transparent); }
+  .home-category:hover { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qless-home *, .qless-home *::before, .qless-home *::after { transition: none !important; animation: none !important; }
+  .home-restaurant:hover, .home-category:hover, .home-restaurant:active, .home-category:active { transform: none; }
+}
+@utility shadow-home-search { box-shadow: var(--shadow-home-search); }
+@utility shadow-home-card { box-shadow: var(--shadow-home-card); }

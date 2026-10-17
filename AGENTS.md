@@ -20,3 +20,4 @@
 - Orders are prepaid only: checkout creates a `payment_attempts` row via `create_payment_attempt` (service_role-only, mirrors place_order validation), then a Razorpay order; the real order is created by the `/api/public/razorpay-webhook` handler only after signature-verified `payment.captured`. Never create orders from frontend redirects.
 - Without RAZORPAY_KEY_ID/RAZORPAY_KEY_SECRET the checkout shows a labelled demo simulation that never creates orders.
 - Restaurant pages live at /restaurant/$slug; /cafe/$slug redirects. Homepage / is the discovery list; demo/unapproved cafés are badged and cannot take orders.
+- Scope discovery-page theme overrides under `.qless-home` in the global stylesheet; why: homepage visual changes must not restyle restaurant, checkout, or staff screens.
