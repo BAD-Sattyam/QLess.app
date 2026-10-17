@@ -19,6 +19,7 @@ import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated
 import { Route as CafeSlugRouteImport } from './routes/cafe.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
+import { Route as StaffLoginRouteImport } from './routes/staff/login'
 import { Route as ApiPublicPaymentsExpireRouteImport } from './routes/api/public/payments-expire'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
@@ -71,6 +72,11 @@ const RestaurantSlugRoute = RestaurantSlugRouteImport.update({
   path: '/restaurant/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffLoginRoute = StaffLoginRouteImport.update({
+  id: '/staff/login',
+  path: '/staff/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsExpireRoute = ApiPublicPaymentsExpireRouteImport.update({
   id: '/api/public/payments-expire',
   path: '/api/public/payments-expire',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/staff/login': typeof StaffLoginRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/staff/login': typeof StaffLoginRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/staff/login': typeof StaffLoginRoute
   '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/staff/login'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/staff/login'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   id:
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/staff/login'
     | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   CafeSlugRoute: typeof CafeSlugRoute
   OrderTokenRoute: typeof OrderTokenRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
+  StaffLoginRoute: typeof StaffLoginRoute
   ApiPublicPaymentsExpireRoute: typeof ApiPublicPaymentsExpireRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff/login': {
+      id: '/staff/login'
+      path: '/staff/login'
+      fullPath: '/staff/login'
+      preLoaderRoute: typeof StaffLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments-expire': {
       id: '/api/public/payments-expire'
       path: '/api/public/payments-expire'
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   CafeSlugRoute: CafeSlugRoute,
   OrderTokenRoute: OrderTokenRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
+  StaffLoginRoute: StaffLoginRoute,
   ApiPublicPaymentsExpireRoute: ApiPublicPaymentsExpireRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
