@@ -12,6 +12,11 @@
 - [ ] Verify captured payment → persisted demo order → assigned staff transitions → tracking and duplicate/expiry provider tests — blocked: Razorpay requires an accepted sandbox contact; no captured payments or assigned staff exist.
 - [ ] Provision requested initial administrator and assigned demonstration staff — blocked: owner must create/confirm the designated email in secure Users → Add user; no separate staff email supplied. Verified-email bootstrap implemented but not exercised.
 
+# Customer email and Google sign-in
+- [x] Enable email/password, Google and Lovable providers; give customer /auth email sign-in and sign-up with a confirmation state, forgot-password link and provider buttons, keeping mobile OTP as a third method.
+- [x] Verify in a real browser: invalid input, wrong credentials, new-account confirmation state, password sign-in reaching My orders, session held across reload, provider-return callback landing a signed-in customer, Google handing off to the sign-in broker; 21 regression checks passed and the build is clean.
+- [ ] Verify Google account selection and inbox confirmation-link completion on the published site — blocked: needs a real Google account interaction and a fresh inbox click, and the updated app must be published first.
+
 # Customer mobile sign-in
 - [x] Add Indian phone / six-digit OTP interface with resend/error states and native Auth calls (no local OTP fallback).
 - [x] Preserve staff email sign-in and add owner-only customer profiles; both existing Auth IDs have profiles, no IDs or order owners changed.
