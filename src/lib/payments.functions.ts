@@ -38,7 +38,7 @@ export const createPaymentOrder = createServerFn({ method: "POST" })
     const { data: attempt, error } = await supabaseAdmin.rpc("create_payment_attempt", {
       p_cafe_id: data.cafeId,
       p_customer_name: data.customerName,
-      p_notes: data.notes ?? null,
+      p_notes: data.notes ?? "",
       p_pickup_at: data.pickupAt,
       p_items: data.items,
       p_client_hash: hash,
