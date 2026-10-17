@@ -19,6 +19,7 @@ import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated
 import { Route as CafeSlugRouteImport } from './routes/cafe.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as RestaurantSlugRouteImport } from './routes/restaurant.$slug'
+import { Route as ApiPublicPaymentsExpireRouteImport } from './routes/api/public/payments-expire'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +71,11 @@ const RestaurantSlugRoute = RestaurantSlugRouteImport.update({
   path: '/restaurant/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsExpireRoute = ApiPublicPaymentsExpireRouteImport.update({
+  id: '/api/public/payments-expire',
+  path: '/api/public/payments-expire',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRazorpayWebhookRoute =
   ApiPublicRazorpayWebhookRouteImport.update({
     id: '/api/public/razorpay-webhook',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/restaurant/$slug': typeof RestaurantSlugRoute
+  '/api/public/payments-expire': typeof ApiPublicPaymentsExpireRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRouteTypes {
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   id:
     | '__root__'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/cafe/$slug'
     | '/order/$token'
     | '/restaurant/$slug'
+    | '/api/public/payments-expire'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   CafeSlugRoute: typeof CafeSlugRoute
   OrderTokenRoute: typeof OrderTokenRoute
   RestaurantSlugRoute: typeof RestaurantSlugRoute
+  ApiPublicPaymentsExpireRoute: typeof ApiPublicPaymentsExpireRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments-expire': {
+      id: '/api/public/payments-expire'
+      path: '/api/public/payments-expire'
+      fullPath: '/api/public/payments-expire'
+      preLoaderRoute: typeof ApiPublicPaymentsExpireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/razorpay-webhook': {
       id: '/api/public/razorpay-webhook'
       path: '/api/public/razorpay-webhook'
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   CafeSlugRoute: CafeSlugRoute,
   OrderTokenRoute: OrderTokenRoute,
   RestaurantSlugRoute: RestaurantSlugRoute,
+  ApiPublicPaymentsExpireRoute: ApiPublicPaymentsExpireRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
