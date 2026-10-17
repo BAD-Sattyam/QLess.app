@@ -115,7 +115,7 @@ function TrackPage() {
 
       <div className="mt-4 flex gap-3 rounded-2xl bg-secondary p-4 text-sm">
         <Wallet className="size-5 shrink-0 text-primary" />
-        <p><strong>Pay at pickup.</strong> Show your code at the counter and pay the café directly. This order is not paid yet.</p>
+        <p><strong>Paid online.</strong> This order is prepaid — just show your pickup code at the counter. For cancellations or refunds, contact the restaurant directly.</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">

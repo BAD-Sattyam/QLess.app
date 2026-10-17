@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Minus, Plus, Wallet } from "lucide-react";
+import { ArrowLeft, CreditCard, Minus, Plus, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,16 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/cart";
 import { formatINR, formatTimeIST } from "@/lib/pricing";
-import { placeOrder } from "@/lib/orders.functions";
+import { createPaymentOrder, getPaymentStatus } from "@/lib/payments.functions";
 import { Empty } from "@/components/CafeView";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Your cart — Qless" },
-      { name: "description", content: "Choose a pickup time and place your pre-order." },
-      { property: "og:title", content: "Your cart — Qless" },
-      { property: "og:description", content: "Choose a pickup time and place your pre-order." },
+      { title: "Checkout — Qless" },
+      { name: "description", content: "Choose a pickup time and prepay for your order." },
+      { property: "og:title", content: "Checkout — Qless" },
+      { property: "og:description", content: "Choose a pickup time and prepay for your order." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -30,16 +30,41 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
 });
 
+declare global {
+  interface Window {
+    Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
+type PayState =
+  | { phase: "idle" }
+  | { phase: "starting" }
+  | { phase: "waiting"; attemptId: string }
+  | { phase: "failed"; reason: string };
+
 function Checkout() {
   const cart = useCart();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const submit = useServerFn(placeOrder);
+  const startPayment = useServerFn(createPaymentOrder);
+  const pollStatus = useServerFn(getPaymentStatus);
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [hp, setHp] = useState("");
   const [slot, setSlot] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [pay, setPay] = useState<PayState>({ phase: "idle" });
+  const [demoResult, setDemoResult] = useState<"success" | "failure" | null>(null);
   const sessionQ = useQuery({
     queryKey: ["session-user"],
     queryFn: async () => (await supabase.auth.getUser()).data.user,
@@ -66,7 +91,7 @@ function Checkout() {
     return (
       <div className="mx-auto max-w-xl">
         <Empty title="Your cart is empty" body="Add a coffee or a snack to get started." />
-        <div className="text-center"><Button asChild size="lg" className="rounded-full"><Link to="/">Browse menu</Link></Button></div>
+        <div className="text-center"><Button asChild size="lg" className="rounded-full"><Link to="/">Browse restaurants</Link></Button></div>
       </div>
     );
   }
@@ -76,7 +101,7 @@ function Checkout() {
       <div className="mx-auto max-w-xl px-4 pt-16 text-center">
         <h1 className="text-3xl font-semibold">Sign in to place your order</h1>
         <p className="mt-2 text-muted-foreground">
-          Your cart is saved. Sign in or create a free account to place the order and track it live.
+          Your cart is saved. Sign in or create a free account to pay and track your order live.
         </p>
         <Button asChild size="lg" className="mt-6 h-12 rounded-full px-8 text-base">
           <Link to="/auth" search={{ redirect: "/checkout" }}>Sign in or create account</Link>
@@ -85,12 +110,30 @@ function Checkout() {
     );
   }
 
-  const onSubmit = async () => {
+  const waitForPayment = async (attemptId: string) => {
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 2500));
+      const res = await pollStatus({ data: { attemptId } });
+      if (res.status === "paid" && res.token) {
+        cart.clear();
+        navigate({ to: "/order/$token", params: { token: res.token }, search: { new: 1 }, replace: true });
+        return;
+      }
+      if (res.status === "failed" || res.status === "expired") {
+        setPay({ phase: "failed", reason: res.status === "expired" ? "The payment session expired. Your slot was released — please try again." : "The payment failed or was cancelled. You have not been charged." });
+        qc.invalidateQueries({ queryKey: ["slots"] });
+        return;
+      }
+    }
+    setPay({ phase: "failed", reason: "We're still confirming your payment. If you were charged, your order will appear under My orders shortly." });
+  };
+
+  const onPay = async () => {
     if (!name.trim()) { toast.error("Please enter your name"); return; }
     if (!slot) { toast.error("Please choose a pickup time"); return; }
-    setBusy(true);
+    setPay({ phase: "starting" });
     try {
-      const res = await submit({
+      const res = await startPayment({
         data: {
           cafeId: cart.cafeId!,
           customerName: name,
@@ -103,23 +146,45 @@ function Checkout() {
       if (!res.ok) {
         toast.error(res.error);
         qc.invalidateQueries({ queryKey: ["slots"] });
+        setPay({ phase: "idle" });
         return;
       }
-      cart.clear();
-      navigate({ to: "/order/$token", params: { token: res.token }, search: { new: 1 }, replace: true });
-    } catch (e) {
-      toast.error(e instanceof Error ? "Please check your details and try again." : "Something went wrong");
-    } finally {
-      setBusy(false);
+      if (res.demo) {
+        setPay({ phase: "waiting", attemptId: res.attemptId });
+        return;
+      }
+      const loaded = await loadRazorpayScript();
+      if (!loaded || !window.Razorpay) {
+        setPay({ phase: "failed", reason: "Couldn't load the payment window. Check your connection and try again." });
+        return;
+      }
+      setPay({ phase: "waiting", attemptId: res.attemptId });
+      const rzp = new window.Razorpay({
+        key: res.keyId,
+        amount: res.amount,
+        currency: "INR",
+        name: "Qless",
+        description: cafeQ.data?.name ?? "Pre-order",
+        order_id: res.razorpayOrderId,
+        prefill: { name: name.trim() },
+        theme: { color: "#6f4e37" },
+        handler: () => waitForPayment(res.attemptId),
+        modal: { ondismiss: () => waitForPayment(res.attemptId) },
+      });
+      rzp.open();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+      setPay({ phase: "idle" });
     }
   };
 
   const slots = (slotsQ.data ?? []).filter((s) => s.remaining > 0);
+  const busy = pay.phase === "starting" || pay.phase === "waiting";
 
   return (
     <div className="mx-auto min-h-screen max-w-xl px-4 pb-36 pt-4">
       <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground">
-        <ArrowLeft className="size-4" /> Back to menu
+        <ArrowLeft className="size-4" /> Back to restaurants
       </Link>
       <h1 className="mt-2 text-3xl font-semibold">Your order</h1>
       {cafeQ.data && <p className="text-muted-foreground">{cafeQ.data.name}</p>}
@@ -149,7 +214,7 @@ function Checkout() {
         {slotsQ.isError && <p className="mt-2 text-sm text-destructive">Couldn't load pickup times. Pull to refresh.</p>}
         {slotsQ.data && slots.length === 0 && (
           <p className="mt-2 rounded-xl bg-muted p-4 text-sm text-muted-foreground">
-            No pickup slots left today. The café may be closed or fully booked.
+            No pickup slots left today. The restaurant may be closed or fully booked.
           </p>
         )}
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -173,24 +238,55 @@ function Checkout() {
           <Input id="name" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya" className="mt-1.5 h-12 rounded-xl bg-card text-base" />
         </div>
         <div>
-          <Label htmlFor="notes">Notes for the barista (optional)</Label>
+          <Label htmlFor="notes">Notes for the kitchen (optional)</Label>
           <Textarea id="notes" value={notes} maxLength={300} onChange={(e) => setNotes(e.target.value)} placeholder="Extra hot, no lid…" className="mt-1.5 rounded-xl bg-card text-base" />
         </div>
         <input type="text" tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} className="hidden" aria-hidden name="website" />
       </section>
 
       <div className="mt-6 flex gap-3 rounded-2xl border border-accent/50 bg-secondary p-4 text-sm">
-        <Wallet className="size-5 shrink-0 text-primary" />
-        <p><strong>Pay at pickup.</strong> No online payment — pay the café directly (cash or UPI) when you collect your order.</p>
+        <ShieldCheck className="size-5 shrink-0 text-primary" />
+        <p><strong>Prepaid order.</strong> Pay securely online by UPI or card. Your order is confirmed only after payment succeeds.</p>
       </div>
 
+      {pay.phase === "waiting" && demoResult === null && (
+        <div className="mt-4 rounded-2xl border border-warning/60 bg-warning/20 p-4 text-sm">
+          <p className="font-semibold">Demo payment simulation</p>
+          <p className="mt-1 text-muted-foreground">
+            Razorpay is not connected yet, so this is a labelled simulation only — no real payment is taken and no order is sent to the restaurant.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setDemoResult("success")}>Simulate success</Button>
+            <Button size="sm" variant="outline" onClick={() => setDemoResult("failure")}>Simulate failure</Button>
+          </div>
+        </div>
+      )}
+      {demoResult === "success" && (
+        <div className="mt-4 rounded-2xl border bg-card p-4 text-sm">
+          <p className="font-semibold">Simulation: payment succeeded</p>
+          <p className="mt-1 text-muted-foreground">
+            In live mode your order would now be confirmed and you'd see a tracking page with a pickup code. In this demo nothing was charged and no order was created.
+          </p>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => { setDemoResult(null); setPay({ phase: "idle" }); }}>Back to checkout</Button>
+        </div>
+      )}
+      {(demoResult === "failure" || pay.phase === "failed") && (
+        <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
+          <p className="font-semibold text-destructive">{demoResult === "failure" ? "Simulation: payment failed" : "Payment not completed"}</p>
+          <p className="mt-1 text-muted-foreground">
+            {pay.phase === "failed" ? pay.reason : "In live mode a failed payment means you are not charged and can simply try again."}
+          </p>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => { setDemoResult(null); setPay({ phase: "idle" }); }}>Try again</Button>
+        </div>
+      )}
       <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl border-t bg-background/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
         <div className="mb-2 flex justify-between text-sm">
-          <span className="text-muted-foreground">Estimated total (confirmed by café)</span>
+          <span className="text-muted-foreground">Total to pay now</span>
           <span className="font-semibold">{formatINR(cart.subtotal)}</span>
         </div>
-        <Button size="lg" disabled={busy} onClick={onSubmit} className="h-14 w-full rounded-2xl text-base">
-          {busy ? "Placing order…" : "Place order · Pay at pickup"}
+        <Button size="lg" disabled={busy} onClick={onPay} className="h-14 w-full rounded-2xl text-base">
+          <CreditCard className="size-5" />
+          {pay.phase === "starting" ? "Starting payment…" : pay.phase === "waiting" ? "Waiting for payment…" : `Pay ${formatINR(cart.subtotal)}`}
         </Button>
       </div>
     </div>

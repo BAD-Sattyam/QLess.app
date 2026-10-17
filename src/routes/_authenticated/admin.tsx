@@ -57,7 +57,7 @@ function AdminPage() {
 }
 
 type Cafe = Tables<"cafes">;
-const emptyCafe = { slug: "", name: "", tagline: "", address: "", open_time: "08:00", close_time: "20:00", lead_time_minutes: 10, avg_prep_minutes: 8, max_orders_per_slot: 6, accepting_orders: true, is_active: true };
+const emptyCafe = { slug: "", name: "", tagline: "", address: "", cuisine: "", open_time: "08:00", close_time: "20:00", lead_time_minutes: 10, avg_prep_minutes: 8, max_orders_per_slot: 6, accepting_orders: true, is_active: true, approved: false };
 
 function CafesTab({ cafes }: { cafes: Cafe[] }) {
   const qc = useQueryClient();
@@ -90,9 +90,11 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
     if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) { toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required"); return; }
     const payload = {
       slug: edit.slug, name: edit.name.trim(), tagline: edit.tagline || null, address: edit.address.trim(),
+      cuisine: edit.cuisine?.trim() || null,
       open_time: edit.open_time, close_time: edit.close_time,
       lead_time_minutes: Number(edit.lead_time_minutes), avg_prep_minutes: Number(edit.avg_prep_minutes),
       max_orders_per_slot: Number(edit.max_orders_per_slot), accepting_orders: edit.accepting_orders, is_active: edit.is_active,
+      approved: edit.approved,
     };
     const { error } = edit.id ? await supabase.from("cafes").update(payload).eq("id", edit.id) : await supabase.from("cafes").insert(payload);
     if (error) { toast.error(error.message); return; }
@@ -104,7 +106,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
     <div className="space-y-3">
       <Button size="lg" className="rounded-full" onClick={() => setEdit({ ...emptyCafe })}>Add café</Button>
       {cafes.map((c) => (
-        <button key={c.id} onClick={() => setEdit({ ...c, tagline: c.tagline ?? "", open_time: c.open_time.slice(0, 5), close_time: c.close_time.slice(0, 5) })} className="block w-full rounded-2xl border bg-card p-4 text-left">
+        <button key={c.id} onClick={() => setEdit({ ...c, tagline: c.tagline ?? "", cuisine: c.cuisine ?? "", open_time: c.open_time.slice(0, 5), close_time: c.close_time.slice(0, 5) })} className="block w-full rounded-2xl border bg-card p-4 text-left">
           <p className="font-semibold">{c.name} {!c.is_active && <span className="text-xs text-destructive">(hidden)</span>}</p>
           <p className="text-sm text-muted-foreground">{c.open_time.slice(0, 5)}–{c.close_time.slice(0, 5)} · lead {c.lead_time_minutes} min · {c.max_orders_per_slot}/slot</p>
         </button>
@@ -117,6 +119,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               <F label="Name"><Input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></F>
               <F label="URL slug"><Input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value.toLowerCase() })} /></F>
               <F label="Tagline"><Input value={edit.tagline ?? ""} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></F>
+              <F label="Cuisine / type"><Input value={edit.cuisine ?? ""} onChange={(e) => setEdit({ ...edit, cuisine: e.target.value })} placeholder="e.g. Café · Cookies & Coffee" /></F>
               <F label="Address"><Textarea value={edit.address} onChange={(e) => setEdit({ ...edit, address: e.target.value })} /></F>
               <F label="Logo">
                 <div className="flex items-center gap-3">
@@ -136,6 +139,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               </div>
               <label className="flex items-center justify-between">Accepting orders <Switch checked={edit.accepting_orders} onCheckedChange={(v) => setEdit({ ...edit, accepting_orders: v })} /></label>
               <label className="flex items-center justify-between">Visible to customers <Switch checked={edit.is_active} onCheckedChange={(v) => setEdit({ ...edit, is_active: v })} /></label>
+              <label className="flex items-center justify-between">Approved pilot (can take paid orders) <Switch checked={edit.approved} onCheckedChange={(v) => setEdit({ ...edit, approved: v })} /></label>
             </div>
           )}
           <DialogFooter><Button size="lg" onClick={save}>Save</Button></DialogFooter>
