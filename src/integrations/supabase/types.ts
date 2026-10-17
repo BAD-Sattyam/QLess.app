@@ -18,9 +18,12 @@ export type Database = {
         Row: {
           accepting_orders: boolean
           address: string
+          approved: boolean
           avg_prep_minutes: number
           close_time: string
+          cover_url: string | null
           created_at: string
+          cuisine: string | null
           demo_mode: boolean
           id: string
           is_active: boolean
@@ -35,9 +38,12 @@ export type Database = {
         Insert: {
           accepting_orders?: boolean
           address: string
+          approved?: boolean
           avg_prep_minutes?: number
           close_time?: string
+          cover_url?: string | null
           created_at?: string
+          cuisine?: string | null
           demo_mode?: boolean
           id?: string
           is_active?: boolean
@@ -52,9 +58,12 @@ export type Database = {
         Update: {
           accepting_orders?: boolean
           address?: string
+          approved?: boolean
           avg_prep_minutes?: number
           close_time?: string
+          cover_url?: string | null
           created_at?: string
+          cuisine?: string | null
           demo_mode?: boolean
           id?: string
           is_active?: boolean
@@ -207,6 +216,7 @@ export type Database = {
           customer_name: string
           id: string
           notes: string | null
+          payment_ref: string | null
           pickup_at: string
           pickup_code: string
           preparing_at: string | null
@@ -227,6 +237,7 @@ export type Database = {
           customer_name: string
           id?: string
           notes?: string | null
+          payment_ref?: string | null
           pickup_at: string
           pickup_code: string
           preparing_at?: string | null
@@ -247,6 +258,7 @@ export type Database = {
           customer_name?: string
           id?: string
           notes?: string | null
+          payment_ref?: string | null
           pickup_at?: string
           pickup_code?: string
           preparing_at?: string | null
@@ -262,6 +274,72 @@ export type Database = {
             columns: ["cafe_id"]
             isOneToOne: false
             referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_attempts: {
+        Row: {
+          amount_paise: number
+          cafe_id: string
+          client_hash: string | null
+          created_at: string
+          customer_name: string
+          expires_at: string
+          id: string
+          items: Json
+          notes: string | null
+          order_id: string | null
+          pickup_at: string
+          razorpay_order_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_paise: number
+          cafe_id: string
+          client_hash?: string | null
+          created_at?: string
+          customer_name: string
+          expires_at?: string
+          id?: string
+          items: Json
+          notes?: string | null
+          order_id?: string | null
+          pickup_at: string
+          razorpay_order_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_paise?: number
+          cafe_id?: string
+          client_hash?: string | null
+          created_at?: string
+          customer_name?: string
+          expires_at?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string | null
+          pickup_at?: string
+          razorpay_order_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_attempts_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_attempts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -307,6 +385,21 @@ export type Database = {
       }
       admin_remove_merchant: { Args: { p_id: string }; Returns: undefined }
       claim_first_admin: { Args: never; Returns: boolean }
+      create_payment_attempt: {
+        Args: {
+          p_cafe_id: string
+          p_client_hash: string
+          p_customer_name: string
+          p_items: Json
+          p_notes: string
+          p_pickup_at: string
+          p_user_id?: string
+        }
+        Returns: {
+          amount_paise: number
+          attempt_id: string
+        }[]
+      }
       get_available_slots: {
         Args: { p_cafe_id: string }
         Returns: {

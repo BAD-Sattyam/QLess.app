@@ -36,6 +36,13 @@
       "when": 1792238813191,
       "tag": "0004_cafe_logos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792239306469,
+      "tag": "0005_prepaid_marketplace",
+      "breakpoints": true
     }
   ]
 }
