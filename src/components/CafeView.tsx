@@ -27,6 +27,12 @@ export function CafeView({ slug }: { slug?: string }) {
     },
   });
   const cafe = cafeQ.data;
+  const logoQ = useQuery({
+    enabled: !!cafe?.logo_url,
+    queryKey: ["cafe-logo", cafe?.logo_url],
+    queryFn: () => resolveLogoUrl(cafe!.logo_url),
+    staleTime: 60 * 60 * 1000,
+  });
   const menuQ = useQuery({
     enabled: !!cafe,
     queryKey: ["menu", cafe?.id],
@@ -93,6 +99,9 @@ export function CafeView({ slug }: { slug?: string }) {
       </header>
 
       <section className="relative -mt-10 mx-4 rounded-3xl bg-card p-5 shadow-soft">
+        {logoQ.data && (
+          <img src={logoQ.data} alt={`${cafe.name} logo`} className="mb-3 h-14 w-auto max-w-[70%] object-contain" />
+        )}
         <h1 className="text-3xl font-semibold text-foreground">{cafe.name}</h1>
         {cafe.demo_mode && (
           <p className="mt-2 rounded-xl border border-accent/50 bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground">
