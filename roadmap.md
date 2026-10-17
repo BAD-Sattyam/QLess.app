@@ -1,8 +1,9 @@
-# Homepage redesign
 # Customer mobile sign-in
-- [ ] Add Indian phone / six-digit OTP flow with resend/error states and native authenticated sessions.
-- [ ] Preserve staff sign-in and add owner-only customer profiles without changing existing user IDs or orders.
-- [ ] Verify validation and screen flows; document hosted SMS setup, throttling and admin-assisted account transition.
+- [x] Add Indian phone / six-digit OTP interface with resend/error states and native Auth calls (no local OTP fallback).
+- [x] Preserve staff email sign-in and add owner-only customer profiles; both existing Auth IDs have profiles, no IDs or order owners changed.
+- [x] Verify validation, mobile layout and staff screen; 13 regression checks passed and current build is clean. Document setup and transition in PHONE_AUTH_SETUP.md.
+- [ ] Verify real OTP delivery, verification, persistent phone session and hosted request/verification throttling — blocked: hosted Phone sign-in is disabled and SMS provider/test recipient setup is required.
+- [ ] Verify existing email customer's phone transition retains the same ID/history — blocked: administrator identity-proofing and supported verified linking workflow must be completed before that customer's phone signup.
 
 # Homepage redesign
 - [x] Update homepage presentation only, preserving discovery queries, routes, filters and demo state.
