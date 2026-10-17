@@ -67,8 +67,8 @@ function Checkout() {
   }
 
   const onSubmit = async () => {
-    if (!name.trim()) return toast.error("Please enter your name");
-    if (!slot) return toast.error("Please choose a pickup time");
+    if (!name.trim()) { toast.error("Please enter your name"); return; }
+    if (!slot) { toast.error("Please choose a pickup time"); return; }
     setBusy(true);
     try {
       const res = await submit({

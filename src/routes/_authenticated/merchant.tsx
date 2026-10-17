@@ -58,7 +58,7 @@ function MerchantPage() {
           {me.data && !me.data.adminExists && (
             <Button className="mt-6 rounded-full" size="lg" onClick={async () => {
               const { error } = await supabase.rpc("claim_first_admin");
-              if (error) return toast.error(error.message);
+              if (error) { toast.error(error.message); return; }
               toast.success("You are now the admin");
               qc.invalidateQueries();
             }}>Set me up as the first admin</Button>
@@ -68,7 +68,7 @@ function MerchantPage() {
     );
   }
 
-  const cafe = cafesQ.data.find((c) => c.id === cafeId) ?? cafesQ.data[0];
+  const cafe = cafesQ.data.find((c) => c.id === cafeId) ?? cafesQ.data[0]!;
   return (
     <StaffShell active="orders">
       {cafesQ.data.length > 1 && (
@@ -119,8 +119,8 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
   useEffect(() => setAccepting(cafe.accepting_orders), [cafe.accepting_orders]);
 
   const act = async (id: string, status: Status, r?: string) => {
-    const { error } = await supabase.rpc("update_order_status", { p_order_id: id, p_status: status, p_reason: r ?? undefined });
-    if (error) return toast.error(error.message);
+    const { error } = await supabase.rpc("update_order_status", { p_order_id: id, p_status: status, ...(r ? { p_reason: r } : {}) });
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ordersKey });
   };
 
@@ -149,7 +149,7 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
           <Switch checked={accepting} onCheckedChange={async (v) => {
             setAccepting(v);
             const { error } = await supabase.rpc("set_cafe_accepting", { p_cafe_id: cafe.id, p_accepting: v });
-            if (error) { setAccepting(!v); return toast.error(error.message); }
+            if (error) { setAccepting(!v); { toast.error(error.message); return; } }
             qc.invalidateQueries({ queryKey: ["staff-cafes"] });
           }} />
         </label>
@@ -188,7 +188,7 @@ function CafeOrders({ cafe }: { cafe: Database["public"]["Tables"]["cafes"]["Row
                   {m.is_available ? "In stock" : "Out of stock"}
                   <Switch checked={m.is_available} onCheckedChange={async (v) => {
                     const { error } = await supabase.rpc("set_item_availability", { p_item_id: m.id, p_available: v });
-                    if (error) return toast.error(error.message);
+                    if (error) { toast.error(error.message); return; }
                     qc.invalidateQueries({ queryKey: ["staff-menu", cafe.id] });
                   }} />
                 </label>

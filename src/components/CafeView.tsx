@@ -227,7 +227,7 @@ function ItemDrawer({
                 className="h-12 flex-1 rounded-full text-base"
                 onClick={() => {
                   const options: Record<string, string> = {};
-                  for (const g of groups) options[g.name] = chosen[g.name] ?? g.options[0]?.label;
+                  for (const g of groups) options[g.name] = chosen[g.name] ?? g.options[0]?.label ?? "";
                   onAdd({ menu_item_id: item.id, name: item.name, unit_price_paise: unit, options, quantity: qty });
                   setChosen({});
                   setQty(1);

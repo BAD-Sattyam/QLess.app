@@ -21,7 +21,7 @@ type TrackedOrder = {
 };
 
 export const Route = createFileRoute("/order/$token")({
-  validateSearch: (s: Record<string, unknown>) => ({ new: s.new ? 1 : undefined }) as { new?: 1 },
+  validateSearch: (s: Record<string, unknown>) => ({ new: s["new"] ? 1 : undefined }) as { new?: 1 },
   head: () => ({
     meta: [
       { title: "Track your order — CoffeeSkip" },

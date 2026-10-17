@@ -63,7 +63,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
   const [edit, setEdit] = useState<(Partial<Cafe> & typeof emptyCafe) | null>(null);
   const save = async () => {
     if (!edit) return;
-    if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) return toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required");
+    if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) { toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required"); return; }
     const payload = {
       slug: edit.slug, name: edit.name.trim(), tagline: edit.tagline || null, address: edit.address.trim(),
       open_time: edit.open_time, close_time: edit.close_time,
@@ -71,7 +71,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
       max_orders_per_slot: Number(edit.max_orders_per_slot), accepting_orders: edit.accepting_orders, is_active: edit.is_active,
     };
     const { error } = edit.id ? await supabase.from("cafes").update(payload).eq("id", edit.id) : await supabase.from("cafes").insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Café saved");
     setEdit(null);
     qc.invalidateQueries();
@@ -132,15 +132,15 @@ function MenuTab({ cafes }: { cafes: Cafe[] }) {
   const save = async () => {
     if (!edit) return;
     const rupees = Number(edit.price);
-    if (!edit.name.trim() || !Number.isFinite(rupees) || rupees < 0) return toast.error("Name and a valid price are required");
+    if (!edit.name.trim() || !Number.isFinite(rupees) || rupees < 0) { toast.error("Name and a valid price are required"); return; }
     let cust: unknown;
     try {
       cust = JSON.parse(edit.customizations || "[]");
       if (!Array.isArray(cust)) throw new Error();
-    } catch { return toast.error("Customizations must be a JSON list"); }
+    } catch { { toast.error("Customizations must be a JSON list"); return; } }
     const payload = { cafe_id: cafeId, name: edit.name.trim(), description: edit.description || null, category: edit.category.trim() || "Other", price_paise: Math.round(rupees * 100), customizations: cust as never, is_available: edit.is_available, is_active: edit.is_active, sort_order: Number(edit.sort_order) };
     const { error } = edit.id ? await supabase.from("menu_items").update(payload).eq("id", edit.id) : await supabase.from("menu_items").insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Item saved");
     setEdit(null);
     qc.invalidateQueries();
@@ -189,7 +189,7 @@ function MenuTab({ cafes }: { cafes: Cafe[] }) {
             {edit?.id && (
               <Button variant="outline" onClick={async () => {
                 const { error } = await supabase.from("menu_items").delete().eq("id", edit.id!);
-                if (error) return toast.error(error.message);
+                if (error) { toast.error(error.message); return; }
                 setEdit(null); qc.invalidateQueries();
               }}>Delete</Button>
             )}
@@ -225,9 +225,9 @@ function MerchantsTab({ cafes }: { cafes: Cafe[] }) {
             {cafes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <Button size="lg" onClick={async () => {
-            if (!email.includes("@")) return toast.error("Enter a valid email");
+            if (!email.includes("@")) { toast.error("Enter a valid email"); return; }
             const { error } = await supabase.rpc("admin_add_merchant", { p_email: email, p_cafe_id: cafeId });
-            if (error) return toast.error(error.message);
+            if (error) { toast.error(error.message); return; }
             toast.success("Access granted"); setEmail(""); qc.invalidateQueries({ queryKey: ["admin-merchants"] });
           }}>Grant</Button>
         </div>
@@ -240,7 +240,7 @@ function MerchantsTab({ cafes }: { cafes: Cafe[] }) {
             <span><span className="font-medium">{m.email}</span> <span className="text-sm text-muted-foreground">· {m.cafe_name}</span></span>
             <Button variant="ghost" size="icon" aria-label="Remove access" onClick={async () => {
               const { error } = await supabase.rpc("admin_remove_merchant", { p_id: m.id });
-              if (error) return toast.error(error.message);
+              if (error) { toast.error(error.message); return; }
               qc.invalidateQueries({ queryKey: ["admin-merchants"] });
             }}><Trash2 className="size-4" /></Button>
           </li>
