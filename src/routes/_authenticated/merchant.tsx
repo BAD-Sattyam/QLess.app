@@ -18,9 +18,9 @@ type Status = Database["public"]["Enums"]["order_status"];
 export const Route = createFileRoute("/_authenticated/merchant")({
   head: () => ({
     meta: [
-      { title: "Orders — CoffeeSkip staff" },
+      { title: "Orders — Qless staff" },
       { name: "description", content: "Manage incoming pre-orders." },
-      { property: "og:title", content: "Orders — CoffeeSkip staff" },
+      { property: "og:title", content: "Orders — Qless staff" },
       { property: "og:description", content: "Manage incoming pre-orders." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -54,7 +54,7 @@ function MerchantPage() {
       <StaffShell active="orders">
         <div className="mx-auto max-w-md py-16 text-center">
           <h1 className="text-2xl font-semibold">No café access yet</h1>
-          <p className="mt-2 text-muted-foreground">Signed in as {me.data?.email}. Ask the CoffeeSkip admin to assign you to a café.</p>
+          <p className="mt-2 text-muted-foreground">Signed in as {me.data?.email}. Ask the Qless admin to assign you to a café.</p>
           {me.data && !me.data.adminExists && (
             <Button className="mt-6 rounded-full" size="lg" onClick={async () => {
               const { error } = await supabase.rpc("claim_first_admin");

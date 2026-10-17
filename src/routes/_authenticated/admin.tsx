@@ -19,9 +19,9 @@ import type { Tables } from "@/integrations/supabase/types";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — CoffeeSkip" },
+      { title: "Admin — Qless" },
       { name: "description", content: "Manage cafés, menus and merchant access." },
-      { property: "og:title", content: "Admin — CoffeeSkip" },
+      { property: "og:title", content: "Admin — Qless" },
       { property: "og:description", content: "Manage cafés, menus and merchant access." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

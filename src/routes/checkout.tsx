@@ -18,9 +18,9 @@ import { Empty } from "@/components/CafeView";
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Your cart — CoffeeSkip" },
+      { title: "Your cart — Qless" },
       { name: "description", content: "Choose a pickup time and place your pre-order." },
-      { property: "og:title", content: "Your cart — CoffeeSkip" },
+      { property: "og:title", content: "Your cart — Qless" },
       { property: "og:description", content: "Choose a pickup time and place your pre-order." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

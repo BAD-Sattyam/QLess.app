@@ -42,7 +42,7 @@ export function StaffShell({ children, active }: { children: ReactNode; active: 
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 bg-espresso text-primary-foreground">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
-          <span className="mr-auto font-display text-lg font-semibold">CoffeeSkip</span>
+          <span className="mr-auto font-display text-lg font-semibold">Qless</span>
           <Link to="/merchant" className={tab(active === "orders")}>Orders</Link>
           {me.data?.isAdmin && <Link to="/admin" className={tab(active === "admin")}>Admin</Link>}
           <Button variant="ghost" size="icon" aria-label="Sign out" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">

@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "CoffeeSkip — Pre-order coffee, skip the queue" },
+      { title: "Qless — Pre-order coffee, skip the queue" },
       { name: "description", content: "Order coffee and snacks ahead and pick up at your office café." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
