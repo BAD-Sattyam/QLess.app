@@ -80,7 +80,7 @@ function HomePage() {
         <div className="hidden items-center gap-2 text-sm font-semibold sm:flex"><MapPin className="size-4 text-primary" /> Gurugram</div>
         <nav aria-label="Account" className="flex items-center gap-1.5">
           <Button asChild variant="ghost" size="sm" className="h-10 rounded-full px-3 text-muted-foreground">
-            <Link to="/staff/login"><ShieldCheck />Staff</Link>
+            <Link to="/staff/login"><ShieldCheck />Partner  Login</Link>
           </Button>
           <Button asChild size="sm" className="h-10 rounded-full px-4 font-bold">
             <Link to={sessionQ.data ? "/orders" : "/auth"}><UserRound />{sessionQ.data ? "My orders" : "Sign in"}</Link>
