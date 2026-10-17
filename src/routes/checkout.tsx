@@ -279,8 +279,6 @@ function Checkout() {
           <Button size="sm" variant="outline" className="mt-3" onClick={() => { setDemoResult(null); setPay({ phase: "idle" }); }}>Try again</Button>
         </div>
       )}
-      {pay.phase === "waiting" && demoResult === null && false}
-
       <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl border-t bg-background/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
         <div className="mb-2 flex justify-between text-sm">
           <span className="text-muted-foreground">Total to pay now</span>
