@@ -85,5 +85,11 @@ describe("emailAuthError", () => {
   it("asks for a stronger password and hides anything unrecognised", () => {
     expect(emailAuthError({ message: "Password should be at least 8 characters" })).toBe("That password doesn't meet the requirements. Use at least 8 characters.");
     expect(emailAuthError({ message: "unexpected provider failure" })).toBe("Couldn't sign you in. Please try again.");
+    expect(emailAuthError({ message: "unexpected provider failure" }, true)).toBe("Couldn't create your account. Please try again.");
+  });
+
+  it("says when an address cannot receive mail", () => {
+    expect(emailAuthError({ message: "This email address is not allowed. Placeholder, reserved, or mistyped domains such as example.com or gmai.com cannot receive email." }, true))
+      .toBe("That email address can't receive mail. Please use a different one.");
   });
 });

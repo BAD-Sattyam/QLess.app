@@ -41,13 +41,14 @@ export function sameOriginUrl(path: string): string {
 }
 
 // Raw auth messages are never shown to customers: they leak provider detail and read as jargon.
-export function emailAuthError(error: { message: string; status?: number | undefined; code?: string | undefined }): string {
+export function emailAuthError(error: { message: string; status?: number | undefined; code?: string | undefined }, signup = false): string {
   const message = error.message.toLowerCase();
   if (error.status === 429 || message.includes("rate_limit") || message.includes("rate limit")) return "Too many attempts. Please wait a minute and try again.";
   if (message.includes("invalid login credentials")) return "That email and password don't match. Try again, or reset your password.";
   if (message.includes("not confirmed") || message.includes("not yet verified") || message.includes("confirm your email")) return "Confirm your email first — we sent a link to your inbox.";
   if (message.includes("already registered") || message.includes("already exists") || message.includes("already been registered")) return "An account with this email already exists. Sign in instead.";
+  if (message.includes("not allowed") || message.includes("placeholder") || message.includes("reserved") || message.includes("mistyped") || message.includes("cannot receive email")) return "That email address can't receive mail. Please use a different one.";
   if (message.includes("password")) return "That password doesn't meet the requirements. Use at least 8 characters.";
-  if (message.includes("email")) return "Check the email address and try again.";
-  return "Couldn't sign you in. Please try again.";
+  if (message.includes("invalid email") || message.includes("email address")) return "Check the email address and try again.";
+  return signup ? "Couldn't create your account. Please try again." : "Couldn't sign you in. Please try again.";
 }

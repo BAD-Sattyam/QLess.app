@@ -82,7 +82,7 @@ function CustomerAuth() {
           // The confirmation link returns to this same site, never to an editor or preview address.
           options: { emailRedirectTo: sameOriginUrl("/auth/callback") },
         });
-        if (authError) { setError(emailAuthError(authError)); return; }
+        if (authError) { setError(emailAuthError(authError, true)); return; }
         if (data.session && data.user) {
           await applyPendingDisplayName(data.user.id);
           await navigate({ to: safeAuthDestination(redirect), replace: true });
