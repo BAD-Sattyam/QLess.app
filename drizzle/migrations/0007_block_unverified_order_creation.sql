@@ -1,0 +1,4 @@
+CREATE OR REPLACE FUNCTION public.place_order(p_cafe_id uuid,p_customer_name text,p_notes text,p_pickup_at timestamptz,p_items jsonb,p_client_hash text,p_user_id uuid DEFAULT NULL) RETURNS TABLE(tracking_token text,pickup_code text) LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN RAISE EXCEPTION 'Unverified order creation is disabled. Use test prepaid checkout; test receipts do not create preparation orders.'; END $$;
+REVOKE ALL ON FUNCTION public.place_order(uuid,text,text,timestamptz,jsonb,text,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.place_order(uuid,text,text,timestamptz,jsonb,text,uuid) TO service_role;
+COMMENT ON FUNCTION public.place_order(uuid,text,text,timestamptz,jsonb,text,uuid) IS 'DEPRECATED: unpaid creation disabled; use create_test_payment_attempt and finalize_test_payment for test-only receipts.';

@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Qless architecture
-- Guest orders go only through the `placeOrder` server function, which calls the `place_order` SQL function with the admin client; anon/authenticated cannot execute it. Why: prices, slots, hours and rate limits must be enforced server-side atomically.
+- Legacy `placeOrder` and `place_order` creation paths are blocked in the test-only integration. Why: directly callable legacy RPCs must not bypass payment verification or create unpaid preparation orders.
 - Guests read orders only via `get_order_by_token` (48-hex token); the pickup code never grants access. Why: private tracking links.
 - Merchant writes (status, stock, pause) go through SECURITY DEFINER RPCs that check `is_cafe_member`; orders tables have no direct write grants. Why: staff must not edit totals or other cafés' data.
 - Money is stored as integer paise; times are timestamptz, displayed in Asia/Kolkata.
