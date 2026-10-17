@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/CafeView";
 import { STATUS_LABELS, formatINR, formatTimeIST } from "@/lib/pricing";
+import { resolveLogoUrl } from "@/lib/logo";
 
 type TrackedOrder = {
   pickup_code: string;
@@ -16,7 +17,7 @@ type TrackedOrder = {
   total_paise: number;
   notes: string | null;
   cancel_reason: string | null;
-  cafe: { name: string; address: string; slug: string };
+  cafe: { name: string; address: string; slug: string; logo_url: string | null };
   items: { name: string; quantity: number; options: Record<string, string>; line_total_paise: number }[];
 };
 
@@ -53,6 +54,12 @@ function TrackPage() {
       return data as unknown as TrackedOrder | null;
     },
   });
+  const logoQ = useQuery({
+    enabled: !!q.data?.cafe.logo_url,
+    queryKey: ["cafe-logo", q.data?.cafe.logo_url],
+    queryFn: () => resolveLogoUrl(q.data!.cafe.logo_url),
+    staleTime: 60 * 60 * 1000,
+  });
 
   if (q.isLoading)
     return <div className="mx-auto max-w-xl space-y-4 p-4"><Skeleton className="h-48 w-full rounded-3xl" /><Skeleton className="h-32 w-full" /></div>;
@@ -74,6 +81,7 @@ function TrackPage() {
         <p className="text-sm uppercase tracking-widest opacity-80">Pickup code</p>
         <p className="mt-1 font-display text-6xl font-semibold tracking-[0.2em]">{o.pickup_code}</p>
         <p className="mt-3 opacity-90">for {o.customer_name} · ready by <strong>{formatTimeIST(o.pickup_at)}</strong></p>
+        {logoQ.data && <img src={logoQ.data} alt={`${o.cafe.name} logo`} className="mx-auto mt-3 h-10 w-auto max-w-[60%] object-contain" />}
         <p className="mt-1 text-sm opacity-75">{o.cafe.name}</p>
       </section>
 

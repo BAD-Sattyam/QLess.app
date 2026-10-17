@@ -25,6 +25,7 @@ export type Database = {
           id: string
           is_active: boolean
           lead_time_minutes: number
+          logo_url: string | null
           max_orders_per_slot: number
           name: string
           open_time: string
@@ -41,6 +42,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           lead_time_minutes?: number
+          logo_url?: string | null
           max_orders_per_slot?: number
           name: string
           open_time?: string
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           lead_time_minutes?: number
+          logo_url?: string | null
           max_orders_per_slot?: number
           name?: string
           open_time?: string

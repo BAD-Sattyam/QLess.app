@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveLogoUrl } from "@/lib/logo";
 import { StaffShell, useStaff } from "@/components/StaffShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +62,29 @@ const emptyCafe = { slug: "", name: "", tagline: "", address: "", open_time: "08
 function CafesTab({ cafes }: { cafes: Cafe[] }) {
   const qc = useQueryClient();
   const [edit, setEdit] = useState<(Partial<Cafe> & typeof emptyCafe) | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const logoQ = useQuery({
+    enabled: !!edit?.logo_url,
+    queryKey: ["cafe-logo", edit?.logo_url],
+    queryFn: () => resolveLogoUrl(edit!.logo_url),
+    staleTime: 60 * 60 * 1000,
+  });
+  const uploadLogo = async (file: File) => {
+    if (!edit?.id) { toast.error("Save the café first, then upload a logo"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    const path = `${edit.id}/logo-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("cafe-logos").upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) { setUploading(false); toast.error(upErr.message); return; }
+    const { error: dbErr } = await supabase.from("cafes").update({ logo_url: path }).eq("id", edit.id);
+    setUploading(false);
+    if (dbErr) { toast.error(dbErr.message); return; }
+    setEdit({ ...edit, logo_url: path });
+    qc.invalidateQueries();
+    toast.success("Logo updated");
+  };
   const save = async () => {
     if (!edit) return;
     if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) { toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required"); return; }
@@ -94,6 +118,15 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               <F label="URL slug"><Input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value.toLowerCase() })} /></F>
               <F label="Tagline"><Input value={edit.tagline ?? ""} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></F>
               <F label="Address"><Textarea value={edit.address} onChange={(e) => setEdit({ ...edit, address: e.target.value })} /></F>
+              <F label="Logo">
+                <div className="flex items-center gap-3">
+                  {logoQ.data && <img src={logoQ.data} alt="Café logo" className="h-12 w-auto max-w-32 rounded-lg border bg-card object-contain p-1" />}
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ""; }} />
+                  <Button type="button" variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
+                    <Upload className="size-4" /> {uploading ? "Uploading…" : edit.logo_url ? "Change logo" : "Upload logo"}
+                  </Button>
+                </div>
+              </F>
               <div className="grid grid-cols-2 gap-3">
                 <F label="Opens (IST)"><Input type="time" value={edit.open_time} onChange={(e) => setEdit({ ...edit, open_time: e.target.value })} /></F>
                 <F label="Closes (IST)"><Input type="time" value={edit.close_time} onChange={(e) => setEdit({ ...edit, close_time: e.target.value })} /></F>
