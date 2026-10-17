@@ -5,7 +5,7 @@ export type CustomizationGroup = {
 
 export const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
-  accepted: "Accepted",
+  accepted: "Confirmed",
   preparing: "Preparing",
   ready: "Ready for Pickup",
   collected: "Collected",

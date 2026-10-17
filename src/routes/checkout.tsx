@@ -51,7 +51,7 @@ type PayState =
   | { phase: "idle" }
   | { phase: "starting" }
   | { phase: "waiting"; attemptId: string; cancelled?: boolean }
-  | { phase: "paid"; amount: number }
+  | { phase: "paid"; amount: number; trackingToken: string | null }
   | { phase: "failed"; reason: string };
 
 function Checkout() {
@@ -102,7 +102,7 @@ function Checkout() {
         const res = await pollStatus({ data: { attemptId } });
         if (res.status === "paid") {
           sessionStorage.removeItem("qless-pending-payment");
-          setPay({ phase: "paid", amount: res.amount });
+          setPay({ phase: "paid", amount: res.amount, trackingToken: res.trackingToken });
           qc.invalidateQueries({ queryKey: ["slots"] });
           return;
         }
@@ -281,7 +281,7 @@ function Checkout() {
 
       <div className="mt-6 flex gap-3 rounded-2xl border border-accent/50 bg-secondary p-4 text-sm">
         <ShieldCheck className="size-5 shrink-0 text-primary" />
-         <p><strong>Razorpay test checkout only.</strong> No real money, collection or settlement. Dohful remains a provisional demonstration outlet; test payments never send an order to the kitchen.</p>
+         <p><strong>Razorpay test checkout only.</strong> No real money, collection or settlement. Dohful remains a provisional demonstration outlet; verified captured test payments create labelled academic demo orders only. No real kitchen fulfillment or official partnership.</p>
       </div>
 
       {pay.phase === "waiting" && (
@@ -299,8 +299,9 @@ function Checkout() {
         <div className="mt-4 rounded-2xl border bg-card p-4 text-sm">
           <p className="font-semibold">Test payment captured and verified · {formatINR(pay.amount)}</p>
           <p className="mt-1 text-muted-foreground">
-            Razorpay confirmed this test payment. No real money was charged and no preparation order was created. Dohful stays in demo mode.
+            Razorpay confirmed this test payment. No real money was charged. Dohful stays in demo mode; any order shown is for academic demonstration only.
           </p>
+          {pay.trackingToken && <Button asChild size="sm" className="mt-3" onClick={() => cart.clear()}><Link to="/order/$token" params={{ token: pay.trackingToken }} search={{ new: 1 }}>Track demo order</Link></Button>}
           <Button size="sm" variant="outline" className="mt-3" onClick={() => { cart.clear(); navigate({ to: "/" }); }}>Back to restaurants</Button>
         </div>
       )}

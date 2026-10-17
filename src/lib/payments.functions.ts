@@ -77,6 +77,7 @@ export const getPaymentStatus = createServerFn({ method: "POST" })
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.rpc("expire_payment_attempts");
-    const { data: fresh } = await context.supabase.from("payment_attempts").select("status,amount_paise,is_test").eq("id", attempt.id).single();
-    return { status: fresh?.status ?? attempt.status, test: fresh?.is_test ?? true, amount: fresh?.amount_paise ?? attempt.amount_paise };
+    const { data: fresh } = await context.supabase.from("payment_attempts").select("status,amount_paise,is_test,order_id").eq("id", attempt.id).single();
+    const { data: order } = fresh?.order_id ? await context.supabase.from("orders").select("tracking_token").eq("id", fresh.order_id).maybeSingle() : { data: null };
+    return { trackingToken: order?.tracking_token ?? null, status: fresh?.status ?? attempt.status, test: fresh?.is_test ?? true, amount: fresh?.amount_paise ?? attempt.amount_paise };
   });

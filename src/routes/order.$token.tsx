@@ -10,6 +10,8 @@ import { STATUS_LABELS, formatINR, formatTimeIST } from "@/lib/pricing";
 import { resolveLogoUrl } from "@/lib/logo";
 
 type TrackedOrder = {
+  is_demo: boolean;
+  payment_verified: boolean;
   pickup_code: string;
   customer_name: string;
   status: string;
@@ -57,7 +59,7 @@ function TrackPage() {
   const logoQ = useQuery({
     enabled: !!q.data?.cafe.logo_url,
     queryKey: ["cafe-logo", q.data?.cafe.logo_url],
-    queryFn: () => resolveLogoUrl(q.data!.cafe.logo_url),
+    queryFn: () => resolveLogoUrl(q.data?.cafe.logo_url),
     staleTime: 60 * 60 * 1000,
   });
 
@@ -72,6 +74,7 @@ function TrackPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-xl px-4 pb-12 pt-6">
+      {o.is_demo && <p className="mb-4 rounded-xl border border-accent/50 bg-secondary p-3 text-sm font-semibold">DEMO ORDER · Verified Razorpay test payment. No real charge or fulfillment; no official partnership.</p>}
       {isNew && (
         <div className="mb-4 flex items-center gap-2 rounded-2xl bg-success p-4 font-semibold text-success-foreground">
           <Check className="size-5" /> Order placed! Bookmark this page to track it.
@@ -110,12 +113,12 @@ function TrackPage() {
             </li>
           ))}
         </ul>
-        <div className="mt-3 flex justify-between border-t pt-3 font-semibold"><span>Total to pay</span><span>{formatINR(o.total_paise)}</span></div>
+        <div className="mt-3 flex justify-between border-t pt-3 font-semibold"><span>{o.is_demo ? "Demo total" : "Order total"}</span><span>{formatINR(o.total_paise)}</span></div>
       </section>
 
       <div className="mt-4 flex gap-3 rounded-2xl bg-secondary p-4 text-sm">
         <Wallet className="size-5 shrink-0 text-primary" />
-        <p><strong>Paid online.</strong> This order is prepaid — just show your pickup code at the counter. For cancellations or refunds, contact the restaurant directly.</p>
+        <p><strong>{o.is_demo ? "Test payment verified." : o.payment_verified ? "Paid online." : "Payment unverified."}</strong> {o.is_demo ? "Pickup and preparation statuses are simulated academic demonstration steps, not instructions to collect real products." : "Show your pickup code at the counter. For cancellations or refunds, contact the restaurant directly."}</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">
