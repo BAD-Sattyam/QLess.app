@@ -1,4 +1,10 @@
 # Homepage redesign
+# Customer mobile sign-in
+- [ ] Add Indian phone / six-digit OTP flow with resend/error states and native authenticated sessions.
+- [ ] Preserve staff sign-in and add owner-only customer profiles without changing existing user IDs or orders.
+- [ ] Verify validation and screen flows; document hosted SMS setup, throttling and admin-assisted account transition.
+
+# Homepage redesign
 - [x] Update homepage presentation only, preserving discovery queries, routes, filters and demo state.
 - [x] Verify mobile/desktop presentation, search, categories and restaurant navigation.
 
