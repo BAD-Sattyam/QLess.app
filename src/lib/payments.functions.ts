@@ -72,12 +72,16 @@ export const getPaymentStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: attempt } = await context.supabase.from("payment_attempts").select("id,status,expires_at,razorpay_order_id,amount_paise,is_test").eq("id", data.attemptId).single();
     if (!attempt) throw new Error("Payment not found");
+    let providerStatus: "authorized" | "no_payment" | "unconfirmed" | "unavailable" = "unavailable";
     if (attempt.status !== "paid" && attempt.razorpay_order_id) {
-      try { await reconcilePayment(attempt.id, attempt.razorpay_order_id); } catch { /* Webhook may still confirm; never report provider outage as failed payment. */ }
+      try {
+        const result = await reconcilePayment(attempt.id, attempt.razorpay_order_id);
+        if ("providerStatus" in result) providerStatus = result.providerStatus;
+      } catch { /* Webhook may still confirm; never report provider outage as failed payment. */ }
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.rpc("expire_payment_attempts");
     const { data: fresh } = await context.supabase.from("payment_attempts").select("status,amount_paise,is_test,order_id").eq("id", attempt.id).single();
     const { data: order } = fresh?.order_id ? await context.supabase.from("orders").select("tracking_token").eq("id", fresh.order_id).maybeSingle() : { data: null };
-    return { trackingToken: order?.tracking_token ?? null, status: fresh?.status ?? attempt.status, test: fresh?.is_test ?? true, amount: fresh?.amount_paise ?? attempt.amount_paise };
+    return { providerStatus, trackingToken: order?.tracking_token ?? null, status: fresh?.status ?? attempt.status, test: fresh?.is_test ?? true, amount: fresh?.amount_paise ?? attempt.amount_paise };
   });

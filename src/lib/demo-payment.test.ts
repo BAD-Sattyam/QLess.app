@@ -7,7 +7,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({
     rpc,
   },
 }));
-import { confirmCapturedPayment } from "./razorpay.server";
+import { confirmCapturedPayment, reconcilePayment } from "./razorpay.server";
 
 const payment = { id: "pay_demoFixture", order_id: "order_demoFixture", amount: 9800, currency: "INR", status: "captured", captured: true, created_at: 1792249000 };
 
@@ -22,6 +22,16 @@ function provider(entity: typeof payment) {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => entity }));
 }
 describe("verified test fulfillment boundary", () => {
+  it("reports an unpaid provider order without creating fulfillment", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ items: [] }) }));
+    expect(await reconcilePayment("attempt", "order_demoFixture")).toEqual({ status: "pending", providerStatus: "no_payment" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it("reports authorization as pending capture, not paid fulfillment", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ items: [{ ...payment, status: "authorized", captured: false }] }) }));
+    expect(await reconcilePayment("attempt", "order_demoFixture")).toEqual({ status: "pending", providerStatus: "authorized" });
+    expect(rpc).not.toHaveBeenCalled();
+  });
   it("passes provider-confirmed ₹98 capture to atomic demo finalization", async () => {
     provider(payment);
     expect(await confirmCapturedPayment("attempt", payment.id)).toEqual({ status: "paid" });

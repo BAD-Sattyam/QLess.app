@@ -1,4 +1,5 @@
 # Email verification redirects
+- [ ] Fix stalled checkout confirmation and verify against real unpaid Razorpay attempts.
 - [x] Inspect hosted provider and canonical URL; published origin is already effective Site URL, both callback/reset destinations accepted; full allowlist editing unavailable through supported tools, documented in QLESS_EMAIL_REDIRECTS.md.
 - [x] Add secure email callback and recovery completion without changing existing sign-in screens or roles; forward legacy Site URL email returns.
 - [x] Test 12 callback/phone/staff rules and published availability; updated local return pages work, published callback/reset/staff pages return 404.

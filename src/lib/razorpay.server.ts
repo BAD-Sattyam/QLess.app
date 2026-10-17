@@ -44,5 +44,5 @@ export async function reconcilePayment(attemptId: string, orderId: string) {
   for (const payment of result.items) {
     if (payment.status === "captured" && payment.captured) return confirmCapturedPayment(attemptId, payment.id);
   }
-  return { status: "pending" as const };
+  return { status: "pending" as const, providerStatus: result.items.some((payment) => payment.status === "authorized") ? "authorized" as const : result.items.length === 0 ? "no_payment" as const : "unconfirmed" as const };
 }
