@@ -119,6 +119,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               <F label="Name"><Input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></F>
               <F label="URL slug"><Input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value.toLowerCase() })} /></F>
               <F label="Tagline"><Input value={edit.tagline ?? ""} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></F>
+              <F label="Cuisine / type"><Input value={edit.cuisine ?? ""} onChange={(e) => setEdit({ ...edit, cuisine: e.target.value })} placeholder="e.g. Café · Cookies & Coffee" /></F>
               <F label="Address"><Textarea value={edit.address} onChange={(e) => setEdit({ ...edit, address: e.target.value })} /></F>
               <F label="Logo">
                 <div className="flex items-center gap-3">
@@ -138,6 +139,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
               </div>
               <label className="flex items-center justify-between">Accepting orders <Switch checked={edit.accepting_orders} onCheckedChange={(v) => setEdit({ ...edit, accepting_orders: v })} /></label>
               <label className="flex items-center justify-between">Visible to customers <Switch checked={edit.is_active} onCheckedChange={(v) => setEdit({ ...edit, is_active: v })} /></label>
+              <label className="flex items-center justify-between">Approved pilot (can take paid orders) <Switch checked={edit.approved} onCheckedChange={(v) => setEdit({ ...edit, approved: v })} /></label>
             </div>
           )}
           <DialogFooter><Button size="lg" onClick={save}>Save</Button></DialogFooter>
