@@ -11,16 +11,15 @@ export function useStaff() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       const uid = u.user?.id;
-      const [{ data: roles }, { data: mems }, { data: adminExists }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", uid!),
-        supabase.from("merchant_memberships").select("cafe_id").eq("user_id", uid!),
-        supabase.rpc("admin_exists"),
+      if (!uid) throw new Error("Sign in first");
+      const [{ data: roles }, { data: mems }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", uid),
+        supabase.from("merchant_memberships").select("cafe_id").eq("user_id", uid),
       ]);
       return {
         email: u.user?.email ?? "",
         isAdmin: !!roles?.some((r) => r.role === "admin"),
         cafeIds: (mems ?? []).map((m) => m.cafe_id),
-        adminExists: !!adminExists,
       };
     },
   });
