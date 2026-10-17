@@ -282,48 +282,63 @@ export type Database = {
         Row: {
           amount_paise: number
           cafe_id: string
+          captured_at: string | null
+          checkout_cancelled_at: string | null
           client_hash: string | null
           created_at: string
           customer_name: string
           expires_at: string
           id: string
+          is_test: boolean
+          item_snapshot: Json
           items: Json
           notes: string | null
           order_id: string | null
           pickup_at: string
           razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           status: string
           user_id: string | null
         }
         Insert: {
           amount_paise: number
           cafe_id: string
+          captured_at?: string | null
+          checkout_cancelled_at?: string | null
           client_hash?: string | null
           created_at?: string
           customer_name: string
           expires_at?: string
           id?: string
+          is_test?: boolean
+          item_snapshot?: Json
           items: Json
           notes?: string | null
           order_id?: string | null
           pickup_at: string
           razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           status?: string
           user_id?: string | null
         }
         Update: {
           amount_paise?: number
           cafe_id?: string
+          captured_at?: string | null
+          checkout_cancelled_at?: string | null
           client_hash?: string | null
           created_at?: string
           customer_name?: string
           expires_at?: string
           id?: string
+          is_test?: boolean
+          item_snapshot?: Json
           items?: Json
           notes?: string | null
           order_id?: string | null
           pickup_at?: string
           razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           status?: string
           user_id?: string | null
         }
@@ -399,6 +414,33 @@ export type Database = {
           amount_paise: number
           attempt_id: string
         }[]
+      }
+      create_test_payment_attempt: {
+        Args: {
+          p_cafe_id: string
+          p_client_hash: string
+          p_customer_name: string
+          p_items: Json
+          p_notes: string
+          p_pickup_at: string
+          p_user_id?: string
+        }
+        Returns: {
+          amount_paise: number
+          attempt_id: string
+        }[]
+      }
+      expire_payment_attempts: { Args: never; Returns: undefined }
+      finalize_test_payment: {
+        Args: {
+          p_amount: number
+          p_attempt_id: string
+          p_captured_at: string
+          p_currency: string
+          p_payment_id: string
+          p_razorpay_order_id: string
+        }
+        Returns: Json
       }
       get_available_slots: {
         Args: { p_cafe_id: string }
