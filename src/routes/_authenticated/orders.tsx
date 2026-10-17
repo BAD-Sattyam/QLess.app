@@ -41,7 +41,15 @@ function MyOrders() {
       <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground">
         <ArrowLeft className="size-4" /> Back to menu
       </Link>
-      <h1 className="mt-2 text-3xl font-semibold">My orders</h1>
+      <div className="mt-2 flex items-center justify-between">
+        <h1 className="text-3xl font-semibold">My orders</h1>
+        <button
+          onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
+          className="text-sm font-medium text-muted-foreground"
+        >
+          Sign out
+        </button>
+      </div>
 
       {ordersQ.isLoading && (
         <div className="mt-6 space-y-3">
