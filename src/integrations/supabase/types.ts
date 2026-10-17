@@ -21,6 +21,7 @@ export type Database = {
           avg_prep_minutes: number
           close_time: string
           created_at: string
+          demo_mode: boolean
           id: string
           is_active: boolean
           lead_time_minutes: number
@@ -36,6 +37,7 @@ export type Database = {
           avg_prep_minutes?: number
           close_time?: string
           created_at?: string
+          demo_mode?: boolean
           id?: string
           is_active?: boolean
           lead_time_minutes?: number
@@ -51,6 +53,7 @@ export type Database = {
           avg_prep_minutes?: number
           close_time?: string
           created_at?: string
+          demo_mode?: boolean
           id?: string
           is_active?: boolean
           lead_time_minutes?: number
