@@ -10,7 +10,7 @@ export function safeAuthDestination(value?: string) {
   return value;
 }
 
-export function phoneAuthError(error: { message: string; status?: number; code?: string }, verification = false) {
+export function phoneAuthError(error: { message: string; status?: number | undefined; code?: string | undefined }, verification = false) {
   if (error.status === 429 || error.code?.includes("rate_limit")) return "Too many attempts. Please wait before trying again.";
   if (/provider|disabled|not enabled|configuration|sms.*fail|unsupported/i.test(error.message)) return "SMS sign-in isn't available yet. Please try again after SMS setup is complete.";
   if (verification && /expired|invalid|otp/i.test(error.message)) return "That code is invalid or expired. Try again or request a new code.";

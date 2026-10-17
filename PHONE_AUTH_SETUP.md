@@ -2,6 +2,8 @@
 
 ## Required hosted setup
 
+Hosted public Auth settings were read successfully during implementation: **phone sign-in is currently disabled**, **email sign-in is enabled**, and **signup is enabled**. No SMS delivery or OTP completion is available until phone/provider setup is finished.
+
 Customer `/auth` now uses Cloud Auth `signInWithOtp` and `verifyOtp` with Indian +91 numbers. Staff email/password sign-in remains at `/staff/login`; email auth stays enabled. Public signup remains enabled and anonymous signup stays disabled. Successful phone verification uses the existing persisted Auth session and owner-scoped order access. Sending a code is not treated as a signed-in session.
 
 Open **More → Users → Auth settings → Phone settings**:
