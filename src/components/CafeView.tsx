@@ -114,7 +114,7 @@ export function CafeView({ slug }: { slug?: string }) {
           <p className="flex gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-accent" />
             Open {formatClock(cafe.open_time)} – {formatClock(cafe.close_time)} · Ready in ~{cafe.lead_time_minutes} min
           </p>
-          <p className="flex gap-2"><Wallet className="mt-0.5 size-4 shrink-0 text-accent" />Pay at pickup — cash or UPI at the counter</p>
+          <p className="flex gap-2"><Wallet className="mt-0.5 size-4 shrink-0 text-accent" />Prepaid online — UPI or cards, confirmed instantly</p>
         </div>
         {!cafe.accepting_orders && (
           <div className="mt-4 rounded-xl bg-warning/30 p-3 text-sm font-medium text-warning-foreground">
