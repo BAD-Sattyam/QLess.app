@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMerchantRouteImport } from './routes/_authenticated/merchant'
 import { Route as CafeSlugRouteImport } from './routes/cafe.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
@@ -36,6 +37,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMerchantRoute = AuthenticatedMerchantRouteImport.update({
   id: '/merchant',
   path: '/merchant',
@@ -56,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/merchant': typeof AuthenticatedMerchantRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/merchant': typeof AuthenticatedMerchantRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/merchant': typeof AuthenticatedMerchantRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
@@ -81,16 +90,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/checkout' | '/merchant' | '/cafe/$slug' | '/order/$token'
+    | '/'
+    | '/auth'
+    | '/checkout'
+    | '/admin'
+    | '/merchant'
+    | '/cafe/$slug'
+    | '/order/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/checkout' | '/merchant' | '/cafe/$slug' | '/order/$token'
+    | '/'
+    | '/auth'
+    | '/checkout'
+    | '/admin'
+    | '/merchant'
+    | '/cafe/$slug'
+    | '/order/$token'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/checkout'
+    | '/_authenticated/admin'
     | '/_authenticated/merchant'
     | '/cafe/$slug'
     | '/order/$token'
@@ -135,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/merchant': {
       id: '/_authenticated/merchant'
       path: '/merchant'
@@ -160,10 +189,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMerchantRoute: typeof AuthenticatedMerchantRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMerchantRoute: AuthenticatedMerchantRoute,
 }
 
