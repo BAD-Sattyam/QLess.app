@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Qless architecture
+- Email verification returns use public `/auth/callback` and `/reset-password`, verify provider identity before navigation, and derive destinations from protected roles/memberships; canonical email links never use editor or preview origins. Why: email links must establish a session on the published origin without granting privileges from URL claims.
 - Customer `/auth` uses native Cloud Auth phone OTP; staff email authentication lives at `/staff/login`, partner entry points reuse it and the existing merchant dashboard; staff/admin routes check server-verified assignments/roles under the managed auth gate. Why: preserve existing screens while denying customers staff access.
 - Customer profile fields live in owner-scoped `public.profiles`, automatically created for new Auth users and backfilled for existing IDs. Why: preserve order ownership and keep privileges exclusively in the protected roles table.
 - Existing email-to-phone transitions require administrator identity verification and linking on the existing Auth ID before phone signup; never auto-merge by phone/name. Why: prevent account takeover and duplicate ownership.
