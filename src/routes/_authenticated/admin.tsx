@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveLogoUrl } from "@/lib/logo";
 import { StaffShell, useStaff } from "@/components/StaffShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
