@@ -5,6 +5,7 @@ export const QLESS_PASSWORD_RESET = `${QLESS_SITE_URL}/reset-password`;
 export type EmailReturnType = "signup" | "invite" | "recovery" | "email" | "email_change" | "magiclink";
 export function emailReturnType(value: string | null): EmailReturnType | undefined {
   if (value === "signup" || value === "invite" || value === "recovery" || value === "email" || value === "email_change" || value === "magiclink") return value;
+  return undefined;
 }
 
 // Destinations are determined by protected role/membership reads, never email or URL claims.
