@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Empty } from "@/components/CafeView";
 import { STATUS_LABELS, formatINR, formatTimeIST } from "@/lib/pricing";
+import { resolveLogoUrl } from "@/lib/logo";
 
 type TrackedOrder = {
   pickup_code: string;
@@ -16,7 +17,7 @@ type TrackedOrder = {
   total_paise: number;
   notes: string | null;
   cancel_reason: string | null;
-  cafe: { name: string; address: string; slug: string };
+  cafe: { name: string; address: string; slug: string; logo_url: string | null };
   items: { name: string; quantity: number; options: Record<string, string>; line_total_paise: number }[];
 };
 
