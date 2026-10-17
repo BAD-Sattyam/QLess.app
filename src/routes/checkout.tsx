@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/cart";
 import { formatINR, formatTimeIST } from "@/lib/pricing";
-import { createPaymentOrder, getPaymentStatus } from "@/lib/payments.functions";
+import { createPaymentOrder, getPaymentStatus, verifyCheckoutPayment, cancelCheckoutPayment } from "@/lib/payments.functions";
 import { Empty } from "@/components/CafeView";
 
 export const Route = createFileRoute("/checkout")({
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/checkout")({
 
 declare global {
   interface Window {
-    Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (opts: Record<string, unknown>) => { open: () => void; on: (event: string, handler: () => void) => void };
   }
 }
 
@@ -50,7 +50,8 @@ function loadRazorpayScript(): Promise<boolean> {
 type PayState =
   | { phase: "idle" }
   | { phase: "starting" }
-  | { phase: "waiting"; attemptId: string }
+  | { phase: "waiting"; attemptId: string; cancelled?: boolean }
+  | { phase: "paid"; amount: number }
   | { phase: "failed"; reason: string };
 
 function Checkout() {
@@ -59,12 +60,14 @@ function Checkout() {
   const qc = useQueryClient();
   const startPayment = useServerFn(createPaymentOrder);
   const pollStatus = useServerFn(getPaymentStatus);
+  const verifyPayment = useServerFn(verifyCheckoutPayment);
+  const cancelPayment = useServerFn(cancelCheckoutPayment);
+  const polling = useRef(false);
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [hp, setHp] = useState("");
   const [slot, setSlot] = useState<string | null>(null);
   const [pay, setPay] = useState<PayState>({ phase: "idle" });
-  const [demoResult, setDemoResult] = useState<"success" | "failure" | null>(null);
   const sessionQ = useQuery({
     queryKey: ["session-user"],
     queryFn: async () => (await supabase.auth.getUser()).data.user,
@@ -74,20 +77,57 @@ function Checkout() {
   const cafeQ = useQuery({
     enabled: !!cart.cafeId,
     queryKey: ["cafe-by-id", cart.cafeId],
-    queryFn: async () => (await supabase.from("cafes").select("*").eq("id", cart.cafeId!).single()).data,
+    queryFn: async () => {
+      if (!cart.cafeId) return null;
+      return (await supabase.from("cafes").select("*").eq("id", cart.cafeId).single()).data;
+    },
   });
   const slotsQ = useQuery({
     enabled: !!cart.cafeId,
     queryKey: ["slots", cart.cafeId],
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_available_slots", { p_cafe_id: cart.cafeId! });
+      if (!cart.cafeId) return [];
+      const { data, error } = await supabase.rpc("get_available_slots", { p_cafe_id: cart.cafeId });
       if (error) throw error;
       return data;
     },
   });
 
-  if (cart.lines.length === 0) {
+  const waitForPayment = async (attemptId: string) => {
+    if (polling.current) return;
+    polling.current = true;
+    try {
+      for (let i = 0; i < 20; i++) {
+        const res = await pollStatus({ data: { attemptId } });
+        if (res.status === "paid") {
+          sessionStorage.removeItem("qless-pending-payment");
+          setPay({ phase: "paid", amount: res.amount });
+          qc.invalidateQueries({ queryKey: ["slots"] });
+          return;
+        }
+        if (res.status === "failed" || res.status === "expired") {
+          sessionStorage.removeItem("qless-pending-payment");
+          setPay({ phase: "failed", reason: res.status === "expired" ? "The test payment expired. Your pickup reservation was released." : "The test payment failed. No restaurant order was created." });
+          qc.invalidateQueries({ queryKey: ["slots"] });
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    } catch { toast.error("Couldn't check payment yet. Please check again."); }
+    finally { polling.current = false; }
+  };
+
+  useEffect(() => {
+    if (!sessionQ.data) return;
+    const attemptId = sessionStorage.getItem("qless-pending-payment");
+    if (attemptId) {
+      setPay({ phase: "waiting", attemptId });
+      void waitForPayment(attemptId);
+    }
+  }, [sessionQ.data?.id]);
+
+  if (cart.lines.length === 0 && pay.phase !== "paid" && pay.phase !== "waiting") {
     return (
       <div className="mx-auto max-w-xl">
         <Empty title="Your cart is empty" body="Add a coffee or a snack to get started." />
@@ -110,32 +150,15 @@ function Checkout() {
     );
   }
 
-  const waitForPayment = async (attemptId: string) => {
-    for (let i = 0; i < 20; i++) {
-      await new Promise((r) => setTimeout(r, 2500));
-      const res = await pollStatus({ data: { attemptId } });
-      if (res.status === "paid" && res.token) {
-        cart.clear();
-        navigate({ to: "/order/$token", params: { token: res.token }, search: { new: 1 }, replace: true });
-        return;
-      }
-      if (res.status === "failed" || res.status === "expired") {
-        setPay({ phase: "failed", reason: res.status === "expired" ? "The payment session expired. Your slot was released — please try again." : "The payment failed or was cancelled. You have not been charged." });
-        qc.invalidateQueries({ queryKey: ["slots"] });
-        return;
-      }
-    }
-    setPay({ phase: "failed", reason: "We're still confirming your payment. If you were charged, your order will appear under My orders shortly." });
-  };
-
   const onPay = async () => {
     if (!name.trim()) { toast.error("Please enter your name"); return; }
     if (!slot) { toast.error("Please choose a pickup time"); return; }
+    if (!cart.cafeId) return;
     setPay({ phase: "starting" });
     try {
       const res = await startPayment({
         data: {
-          cafeId: cart.cafeId!,
+          cafeId: cart.cafeId,
           customerName: name,
           notes,
           pickupAt: slot,
@@ -149,13 +172,11 @@ function Checkout() {
         setPay({ phase: "idle" });
         return;
       }
-      if (res.demo) {
-        setPay({ phase: "waiting", attemptId: res.attemptId });
-        return;
-      }
+      sessionStorage.setItem("qless-pending-payment", res.attemptId);
       const loaded = await loadRazorpayScript();
       if (!loaded || !window.Razorpay) {
-        setPay({ phase: "failed", reason: "Couldn't load the payment window. Check your connection and try again." });
+        setPay({ phase: "waiting", attemptId: res.attemptId, cancelled: true });
+        void waitForPayment(res.attemptId);
         return;
       }
       setPay({ phase: "waiting", attemptId: res.attemptId });
@@ -164,12 +185,24 @@ function Checkout() {
         amount: res.amount,
         currency: "INR",
         name: "Qless",
-        description: cafeQ.data?.name ?? "Pre-order",
+        description: `TEST ONLY — ${cafeQ.data?.name ?? "Qless"}`,
         order_id: res.razorpayOrderId,
         prefill: { name: name.trim() },
-        theme: { color: "#6f4e37" },
-        handler: () => waitForPayment(res.attemptId),
-        modal: { ondismiss: () => waitForPayment(res.attemptId) },
+        handler: async (response: { razorpay_payment_id: string; razorpay_signature: string }) => {
+          try {
+            await verifyPayment({ data: { attemptId: res.attemptId, paymentId: response.razorpay_payment_id, signature: response.razorpay_signature } });
+          } catch { toast.error("Payment verification is pending. Checking securely…"); }
+          void waitForPayment(res.attemptId);
+        },
+        modal: { ondismiss: () => {
+          setPay({ phase: "waiting", attemptId: res.attemptId, cancelled: true });
+          void cancelPayment({ data: { attemptId: res.attemptId } }).catch(() => {});
+          void waitForPayment(res.attemptId);
+        } },
+      });
+      rzp.on("payment.failed", () => {
+        setPay({ phase: "waiting", attemptId: res.attemptId });
+        void waitForPayment(res.attemptId);
       });
       rzp.open();
     } catch {
@@ -179,7 +212,7 @@ function Checkout() {
   };
 
   const slots = (slotsQ.data ?? []).filter((s) => s.remaining > 0);
-  const busy = pay.phase === "starting" || pay.phase === "waiting";
+  const busy = pay.phase === "starting" || pay.phase === "waiting" || pay.phase === "paid" || !sessionQ.data;
 
   return (
     <div className="mx-auto min-h-screen max-w-xl px-4 pb-36 pt-4">
@@ -246,37 +279,36 @@ function Checkout() {
 
       <div className="mt-6 flex gap-3 rounded-2xl border border-accent/50 bg-secondary p-4 text-sm">
         <ShieldCheck className="size-5 shrink-0 text-primary" />
-        <p><strong>Prepaid order.</strong> Pay securely online by UPI or card. Your order is confirmed only after payment succeeds.</p>
+         <p><strong>Razorpay test checkout only.</strong> No real money, collection or settlement. Dohful remains a provisional demonstration outlet; test payments never send an order to the kitchen.</p>
       </div>
 
-      {pay.phase === "waiting" && demoResult === null && (
+      {pay.phase === "waiting" && (
         <div className="mt-4 rounded-2xl border border-warning/60 bg-warning/20 p-4 text-sm">
-          <p className="font-semibold">Demo payment simulation</p>
+          <p className="font-semibold">{pay.cancelled ? "Checkout closed — confirmation pending" : "Confirming test payment"}</p>
           <p className="mt-1 text-muted-foreground">
-            Razorpay is not connected yet, so this is a labelled simulation only — no real payment is taken and no order is sent to the restaurant.
+            We are checking captured payment status with Razorpay. Closing checkout does not confirm failure. Unpaid reservations expire after 15 minutes.
           </p>
           <div className="mt-3 flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setDemoResult("success")}>Simulate success</Button>
-            <Button size="sm" variant="outline" onClick={() => setDemoResult("failure")}>Simulate failure</Button>
+            <Button size="sm" variant="outline" onClick={() => void waitForPayment(pay.attemptId)}>Check payment</Button>
           </div>
         </div>
       )}
-      {demoResult === "success" && (
+      {pay.phase === "paid" && (
         <div className="mt-4 rounded-2xl border bg-card p-4 text-sm">
-          <p className="font-semibold">Simulation: payment succeeded</p>
+          <p className="font-semibold">Test payment captured and verified · {formatINR(pay.amount)}</p>
           <p className="mt-1 text-muted-foreground">
-            In live mode your order would now be confirmed and you'd see a tracking page with a pickup code. In this demo nothing was charged and no order was created.
+            Razorpay confirmed this test payment. No real money was charged and no preparation order was created. Dohful stays in demo mode.
           </p>
-          <Button size="sm" variant="outline" className="mt-3" onClick={() => { setDemoResult(null); setPay({ phase: "idle" }); }}>Back to checkout</Button>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => { cart.clear(); navigate({ to: "/" }); }}>Back to restaurants</Button>
         </div>
       )}
-      {(demoResult === "failure" || pay.phase === "failed") && (
+      {pay.phase === "failed" && (
         <div className="mt-4 rounded-2xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
-          <p className="font-semibold text-destructive">{demoResult === "failure" ? "Simulation: payment failed" : "Payment not completed"}</p>
+          <p className="font-semibold text-destructive">Test payment not completed</p>
           <p className="mt-1 text-muted-foreground">
-            {pay.phase === "failed" ? pay.reason : "In live mode a failed payment means you are not charged and can simply try again."}
+            {pay.reason}
           </p>
-          <Button size="sm" variant="outline" className="mt-3" onClick={() => { setDemoResult(null); setPay({ phase: "idle" }); }}>Try again</Button>
+          <Button size="sm" variant="outline" className="mt-3" onClick={() => { setSlot(null); setPay({ phase: "idle" }); }}>Try again</Button>
         </div>
       )}
       <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-xl border-t bg-background/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
@@ -286,7 +318,7 @@ function Checkout() {
         </div>
         <Button size="lg" disabled={busy} onClick={onPay} className="h-14 w-full rounded-2xl text-base">
           <CreditCard className="size-5" />
-          {pay.phase === "starting" ? "Starting payment…" : pay.phase === "waiting" ? "Waiting for payment…" : `Pay ${formatINR(cart.subtotal)}`}
+           {pay.phase === "starting" ? "Starting test payment…" : pay.phase === "waiting" ? "Waiting for confirmation…" : pay.phase === "paid" ? "Test payment verified" : `Test pay ${formatINR(cart.subtotal)}`}
         </Button>
       </div>
     </div>
