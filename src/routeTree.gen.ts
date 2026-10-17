@@ -13,9 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMerchantRouteImport } from './routes/_authenticated/merchant'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as CafeSlugRouteImport } from './routes/cafe.$slug'
 import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as PartnerLoginRouteImport } from './routes/partner/login'
@@ -44,6 +46,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -58,6 +65,11 @@ const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
 } as any)
 const CafeSlugRoute = CafeSlugRouteImport.update({
   id: '/cafe/$slug',
@@ -104,11 +116,13 @@ const ApiPublicRazorpayWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/checkout': typeof CheckoutRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/merchant': typeof AuthenticatedMerchantRoute
   '/orders': typeof AuthenticatedOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/partner/login': typeof PartnerLoginRoute
@@ -120,11 +134,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/checkout': typeof CheckoutRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/merchant': typeof AuthenticatedMerchantRoute
   '/orders': typeof AuthenticatedOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/partner/login': typeof PartnerLoginRoute
@@ -138,11 +154,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/checkout': typeof CheckoutRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/merchant': typeof AuthenticatedMerchantRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/cafe/$slug': typeof CafeSlugRoute
   '/order/$token': typeof OrderTokenRoute
   '/partner/login': typeof PartnerLoginRoute
@@ -158,9 +176,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/checkout'
+    | '/reset-password'
     | '/admin'
     | '/merchant'
     | '/orders'
+    | '/auth/callback'
     | '/cafe/$slug'
     | '/order/$token'
     | '/partner/login'
@@ -174,9 +194,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/checkout'
+    | '/reset-password'
     | '/admin'
     | '/merchant'
     | '/orders'
+    | '/auth/callback'
     | '/cafe/$slug'
     | '/order/$token'
     | '/partner/login'
@@ -191,9 +213,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/checkout'
+    | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/merchant'
     | '/_authenticated/orders'
+    | '/auth/callback'
     | '/cafe/$slug'
     | '/order/$token'
     | '/partner/login'
@@ -207,8 +231,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   CafeSlugRoute: typeof CafeSlugRoute
   OrderTokenRoute: typeof OrderTokenRoute
   PartnerLoginRoute: typeof PartnerLoginRoute
@@ -248,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -268,6 +300,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders'
       preLoaderRoute: typeof AuthenticatedOrdersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/cafe/$slug': {
       id: '/cafe/$slug'
@@ -345,11 +384,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   CafeSlugRoute: CafeSlugRoute,
   OrderTokenRoute: OrderTokenRoute,
   PartnerLoginRoute: PartnerLoginRoute,

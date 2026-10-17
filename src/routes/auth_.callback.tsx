@@ -5,7 +5,7 @@ import { completeEmailReturn } from "@/lib/complete-email-return";
 import { emailReturnDestination } from "@/lib/auth-return";
 import { getStaffAccess } from "@/lib/staff-access.functions";
 
-export const Route = createFileRoute("/auth/callback")({
+export const Route = createFileRoute("/auth_/callback")({
   head: () => ({ meta: [
     { title: "Verify your email — Qless" },
     { name: "description", content: "Securely complete your Qless email verification or staff invitation." },
