@@ -106,7 +106,7 @@ function CafesTab({ cafes }: { cafes: Cafe[] }) {
     <div className="space-y-3">
       <Button size="lg" className="rounded-full" onClick={() => setEdit({ ...emptyCafe })}>Add café</Button>
       {cafes.map((c) => (
-        <button key={c.id} onClick={() => setEdit({ ...c, tagline: c.tagline ?? "", open_time: c.open_time.slice(0, 5), close_time: c.close_time.slice(0, 5) })} className="block w-full rounded-2xl border bg-card p-4 text-left">
+        <button key={c.id} onClick={() => setEdit({ ...c, tagline: c.tagline ?? "", cuisine: c.cuisine ?? "", open_time: c.open_time.slice(0, 5), close_time: c.close_time.slice(0, 5) })} className="block w-full rounded-2xl border bg-card p-4 text-left">
           <p className="font-semibold">{c.name} {!c.is_active && <span className="text-xs text-destructive">(hidden)</span>}</p>
           <p className="text-sm text-muted-foreground">{c.open_time.slice(0, 5)}–{c.close_time.slice(0, 5)} · lead {c.lead_time_minutes} min · {c.max_orders_per_slot}/slot</p>
         </button>

@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
         const { data: placed, error } = await supabaseAdmin.rpc("place_order", {
           p_cafe_id: attempt.cafe_id,
           p_customer_name: attempt.customer_name,
-          p_notes: attempt.notes ?? undefined,
+          p_notes: attempt.notes ?? "",
           p_pickup_at: attempt.pickup_at,
           p_items: attempt.items,
           p_client_hash: attempt.client_hash ?? "",
