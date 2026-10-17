@@ -70,7 +70,7 @@ export function CafeView({ slug }: { slug?: string }) {
         <img src={hero} alt="" width={1280} height={768} className="h-56 w-full object-cover sm:rounded-b-3xl" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
           <span className="rounded-full bg-card/90 px-3 py-1 text-sm font-semibold text-primary backdrop-blur">
-            CoffeeSkip
+            Qless
           </span>
           <Link to="/auth" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
             Staff

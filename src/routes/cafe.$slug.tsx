@@ -4,9 +4,9 @@ import { CafeView } from "@/components/CafeView";
 export const Route = createFileRoute("/cafe/$slug")({
   head: () => ({
     meta: [
-      { title: "Café menu — CoffeeSkip" },
+      { title: "Café menu — Qless" },
       { name: "description", content: "Browse the menu and pre-order for pickup." },
-      { property: "og:title", content: "Café menu — CoffeeSkip" },
+      { property: "og:title", content: "Café menu — Qless" },
       { property: "og:description", content: "Browse the menu and pre-order for pickup." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

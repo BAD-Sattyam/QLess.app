@@ -24,10 +24,10 @@ export const Route = createFileRoute("/order/$token")({
   validateSearch: (s: Record<string, unknown>) => ({ new: s["new"] ? 1 : undefined }) as { new?: 1 },
   head: () => ({
     meta: [
-      { title: "Track your order — CoffeeSkip" },
-      { name: "description", content: "Live status of your CoffeeSkip pre-order." },
-      { property: "og:title", content: "Track your order — CoffeeSkip" },
-      { property: "og:description", content: "Live status of your CoffeeSkip pre-order." },
+      { title: "Track your order — Qless" },
+      { name: "description", content: "Live status of your Qless pre-order." },
+      { property: "og:title", content: "Track your order — Qless" },
+      { property: "og:description", content: "Live status of your Qless pre-order." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

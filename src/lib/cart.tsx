@@ -20,7 +20,7 @@ type CartCtx = CartState & {
 };
 
 const Ctx = createContext<CartCtx | null>(null);
-const KEY = "coffeeskip-cart-v1";
+const KEY = "qless-cart-v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<CartState>({ cafeId: null, lines: [] });
