@@ -16,3 +16,4 @@
 - Money is stored as integer paise; times are timestamptz, displayed in Asia/Kolkata.
 - Customers must sign in to place orders: `placeOrder` uses requireSupabaseAuth and stamps orders.user_id; guests can browse but checkout shows a sign-in gate. Why: customer accounts with order history at /orders.
 - Customers read their own orders via RLS (orders.user_id = auth.uid()); the token-based get_order_by_token path still works for tracking links. Why: private order data, shareable tracking.
+- Cafés have a demo_mode flag: place_order rejects demo cafés and the café page shows a provisional-details badge. Why: demo outlets must not take real orders until the merchant confirms menu, hours and staff.

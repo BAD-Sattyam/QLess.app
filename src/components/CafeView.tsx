@@ -93,6 +93,11 @@ export function CafeView({ slug }: { slug?: string }) {
 
       <section className="relative -mt-10 mx-4 rounded-3xl bg-card p-5 shadow-soft">
         <h1 className="text-3xl font-semibold text-foreground">{cafe.name}</h1>
+        {cafe.demo_mode && (
+          <p className="mt-2 rounded-xl border border-accent/50 bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground">
+            Demonstration outlet on Qless — menu, prices and hours are provisional and pending the café's confirmation. Ordering is disabled in demo mode.
+          </p>
+        )}
         {cafe.tagline && <p className="mt-1 text-muted-foreground">{cafe.tagline}</p>}
         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
           <p className="flex gap-2"><MapPin className="mt-0.5 size-4 shrink-0 text-accent" />{cafe.address}</p>
