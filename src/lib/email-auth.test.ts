@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { emailAuthError, emailSchema, passwordSchema, sameOriginUrl, safeReturnPath, saveAuthReturn, takeAuthReturn } from "./email-auth";
 
 // The suite may run without a DOM: give the helpers a storage stub so the round trip is real.
-if (typeof (globalThis as Record<string, unknown>).sessionStorage === "undefined") {
+if (typeof (globalThis as Record<string, unknown>)["sessionStorage"] === "undefined") {
   const store = new Map<string, string>();
   Object.defineProperty(globalThis, "sessionStorage", {
     configurable: true,
