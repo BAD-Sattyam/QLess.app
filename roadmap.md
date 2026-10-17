@@ -1,3 +1,9 @@
+# Academic demonstration completion
+- [ ] Add partner entry points and secure staff/admin access; remove public first-admin claiming.
+- [ ] Turn captured, verified test receipts into clearly labelled persisted demonstration orders with tracking.
+- [ ] Verify access controls, transitions, persistence and payment failure safeguards; document honest setup blockers.
+- [ ] Provision requested initial administrator and assigned demonstration staff through secure existing tools.
+
 # Customer mobile sign-in
 - [x] Add Indian phone / six-digit OTP interface with resend/error states and native Auth calls (no local OTP fallback).
 - [x] Preserve staff email sign-in and add owner-only customer profiles; both existing Auth IDs have profiles, no IDs or order owners changed.
