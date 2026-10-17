@@ -10,6 +10,10 @@
 <!-- LOVABLE:END -->
 
 ## Qless architecture
+- Customer `/auth` uses native Cloud Auth phone OTP; staff email authentication lives at `/staff/login` and existing protected dashboards retain their server authorization. Why: phone identity is provider-verified and staff access must not depend on customer UI.
+- Customer profile fields live in owner-scoped `public.profiles`, automatically created for new Auth users and backfilled for existing IDs. Why: preserve order ownership and keep privileges exclusively in the protected roles table.
+- Existing email-to-phone transitions require administrator identity verification and linking on the existing Auth ID before phone signup; never auto-merge by phone/name. Why: prevent account takeover and duplicate ownership.
+- OTP resend UI is a convenience only; native Auth controls issue/verification limits and SMS credentials. Why: bypassable browser timers must not be presented as security throttling.
 - Legacy `placeOrder` and `place_order` creation paths are blocked in the test-only integration. Why: directly callable legacy RPCs must not bypass payment verification or create unpaid preparation orders.
 - Guests read orders only via `get_order_by_token` (48-hex token); the pickup code never grants access. Why: private tracking links.
 - Merchant writes (status, stock, pause) go through SECURITY DEFINER RPCs that check `is_cafe_member`; orders tables have no direct write grants. Why: staff must not edit totals or other cafés' data.
