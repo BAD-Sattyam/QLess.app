@@ -62,6 +62,29 @@ const emptyCafe = { slug: "", name: "", tagline: "", address: "", open_time: "08
 function CafesTab({ cafes }: { cafes: Cafe[] }) {
   const qc = useQueryClient();
   const [edit, setEdit] = useState<(Partial<Cafe> & typeof emptyCafe) | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const logoQ = useQuery({
+    enabled: !!edit?.logo_url,
+    queryKey: ["cafe-logo", edit?.logo_url],
+    queryFn: () => resolveLogoUrl(edit!.logo_url),
+    staleTime: 60 * 60 * 1000,
+  });
+  const uploadLogo = async (file: File) => {
+    if (!edit?.id) { toast.error("Save the café first, then upload a logo"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    const path = `${edit.id}/logo-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("cafe-logos").upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) { setUploading(false); toast.error(upErr.message); return; }
+    const { error: dbErr } = await supabase.from("cafes").update({ logo_url: path }).eq("id", edit.id);
+    setUploading(false);
+    if (dbErr) { toast.error(dbErr.message); return; }
+    setEdit({ ...edit, logo_url: path });
+    qc.invalidateQueries();
+    toast.success("Logo updated");
+  };
   const save = async () => {
     if (!edit) return;
     if (!edit.name.trim() || !edit.address.trim() || !/^[a-z0-9-]+$/.test(edit.slug)) { toast.error("Name, address and a lowercase slug (a-z, 0-9, -) are required"); return; }
