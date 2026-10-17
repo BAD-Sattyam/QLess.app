@@ -7,4 +7,4 @@
 - [x] Connect checkout callbacks and recover pending payments without changing layout.
 - [x] Request test credentials and report webhook setup and payment test checklist.
 - [x] Run payment regression tests and verify signed-in checkout opens Razorpay Test Mode and unsigned webhooks are rejected.
-- [ ] Complete provider success/failure, duplicate delivery and 15-minute expiry acceptance tests — blocked on provider contact completion and Test Mode webhook configuration/publication.
+- [ ] Complete provider success/failure, duplicate delivery and 15-minute expiry acceptance tests — user confirmed webhook setup; published endpoint still returns 503 "Webhook not configured", so publication of the configured app is required before provider delivery can be verified.
