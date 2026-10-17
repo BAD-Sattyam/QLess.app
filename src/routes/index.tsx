@@ -164,7 +164,7 @@ function RestaurantCard({ cafe }: { cafe: Cafe }) {
           <p className="mt-1 flex items-center gap-1 text-xs">
             <Clock className="size-3 shrink-0" />
             {open ? (
-              <span className="font-medium text-success-foreground">Open · {formatClock(cafe.open_time)}–{formatClock(cafe.close_time)}</span>
+              <span className="font-medium text-primary">Open · {formatClock(cafe.open_time)}–{formatClock(cafe.close_time)}</span>
             ) : (
               <span className="text-muted-foreground">Closed · opens {formatClock(cafe.open_time)}</span>
             )}
