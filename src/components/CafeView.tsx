@@ -9,6 +9,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/cart";
 import { estimateUnitPrice, formatClock, formatINR, parseGroups } from "@/lib/pricing";
+import { resolveLogoUrl } from "@/lib/logo";
 import type { Tables } from "@/integrations/supabase/types";
 import hero from "@/assets/hero-coffee.jpg";
 
