@@ -205,8 +205,10 @@ function Checkout() {
         void waitForPayment(res.attemptId);
       });
       rzp.open();
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      const safeMessages = ["Test payments are not configured yet.", "Live payments are disabled. Configure Razorpay test credentials."];
+      toast.error(safeMessages.includes(message) ? message : "Something went wrong. Please try again.");
       setPay({ phase: "idle" });
     }
   };
