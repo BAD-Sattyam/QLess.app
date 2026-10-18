@@ -10,12 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/cart";
 import { estimateUnitPrice, formatClock, formatINR, parseGroups } from "@/lib/pricing";
 import { resolveLogoUrl } from "@/lib/logo";
+import { useDisplayName } from "@/hooks/use-display-name";
 import type { Tables } from "@/integrations/supabase/types";
 import hero from "@/assets/hero-coffee.jpg";
 
 type MenuItem = Tables<"menu_items">;
 
 export function CafeView({ slug }: { slug?: string }) {
+  const nameQ = useDisplayName();
   const cafeQ = useQuery({
     queryKey: ["cafe", slug ?? "__first"],
     queryFn: async () => {
@@ -89,7 +91,7 @@ export function CafeView({ slug }: { slug?: string }) {
               to={sessionQ.data ? "/orders" : "/auth"}
               className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-primary backdrop-blur"
             >
-              {sessionQ.data ? "My orders" : "Sign in"}
+              {sessionQ.data ? (nameQ.data ?? "My orders") : "Sign in"}
             </Link>
             <Link to="/staff/login" className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
               Staff

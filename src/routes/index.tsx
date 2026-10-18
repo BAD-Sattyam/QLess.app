@@ -10,6 +10,7 @@ import homeCoffee from "@/assets/qless-home-coffee.jpg";
 import cafePhoto from "@/assets/hero-coffee.jpg";
 import { formatClock } from "@/lib/pricing";
 import { resolveLogoUrl } from "@/lib/logo";
+import { useDisplayName } from "@/hooks/use-display-name";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/")({
@@ -58,6 +59,7 @@ function HomePage() {
     queryFn: async () => (await supabase.auth.getUser()).data.user,
     staleTime: 60_000,
   });
+  const nameQ = useDisplayName();
 
   const categories = useMemo(() => [...new Set(menuQ.data?.map((m) => m.category) ?? [])].sort(), [menuQ.data]);
 
@@ -83,7 +85,7 @@ function HomePage() {
             <Link to="/staff/login"><ShieldCheck />Partner  Login</Link>
           </Button>
           <Button asChild size="sm" className="h-10 rounded-full px-4 font-bold">
-            <Link to={sessionQ.data ? "/orders" : "/auth"}><UserRound />{sessionQ.data ? "My orders" : "Sign in"}</Link>
+            <Link to={sessionQ.data ? "/orders" : "/auth"}><UserRound /><span className="max-w-28 truncate">{sessionQ.data ? (nameQ.data ?? "My orders") : "Sign in"}</span></Link>
           </Button>
         </nav>
       </header>
