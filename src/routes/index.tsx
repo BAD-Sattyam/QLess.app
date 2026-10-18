@@ -59,6 +59,7 @@ function HomePage() {
     queryFn: async () => (await supabase.auth.getUser()).data.user,
     staleTime: 60_000,
   });
+  const nameQ = useDisplayName();
 
   const categories = useMemo(() => [...new Set(menuQ.data?.map((m) => m.category) ?? [])].sort(), [menuQ.data]);
 

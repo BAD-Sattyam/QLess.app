@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { STATUS_LABELS, formatINR } from "@/lib/pricing";
+import { useDisplayName } from "@/hooks/use-display-name";
 
 export const Route = createFileRoute("/_authenticated/orders")({
   head: () => ({
