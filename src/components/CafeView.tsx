@@ -17,6 +17,7 @@ import hero from "@/assets/hero-coffee.jpg";
 type MenuItem = Tables<"menu_items">;
 
 export function CafeView({ slug }: { slug?: string }) {
+  const nameQ = useDisplayName();
   const cafeQ = useQuery({
     queryKey: ["cafe", slug ?? "__first"],
     queryFn: async () => {

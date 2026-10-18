@@ -23,6 +23,7 @@ export const Route = createFileRoute("/_authenticated/orders")({
 });
 
 function MyOrders() {
+  const nameQ = useDisplayName();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const ordersQ = useQuery({
