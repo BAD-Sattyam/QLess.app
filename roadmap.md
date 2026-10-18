@@ -34,3 +34,7 @@
 - [x] Request test credentials and report webhook setup and payment test checklist.
 - [x] Run payment regression tests and verify signed-in checkout opens Razorpay Test Mode and unsigned webhooks are rejected.
 - [ ] Complete provider success/failure, duplicate delivery and 15-minute expiry acceptance tests — published webhook now rejects unsigned requests with HTTP 401; nine regression tests passed and signed-in ₹98 checkout opened Razorpay Test Mode. Provider payment completion and signed delivery remain unverified; five pending test attempts have no captured receipt and no preparation orders exist.
+
+# Signed-in customer name in the header
+- [x] Show the customer's saved name instead of "My orders" in the homepage and restaurant header and as the orders-page heading, falling back to "My orders" when no name was given.
+- [x] Verify in a real browser at desktop and phone sizes: email sign-in lands on the orders page headed with the name, and both headers show it; 41 regression checks passed and the build is clean.
