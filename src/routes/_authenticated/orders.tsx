@@ -43,8 +43,11 @@ function MyOrders() {
       <Link to="/" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground">
         <ArrowLeft className="size-4" /> Back to menu
       </Link>
-      <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">My orders</h1>
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="truncate text-3xl font-semibold">{nameQ.data ?? "My orders"}</h1>
+          {nameQ.data && <p className="mt-1 text-sm text-muted-foreground">My orders</p>}
+        </div>
         <Button variant="ghost"
           onClick={async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); await navigate({ to: "/auth", replace: true }); }}
           className="text-sm font-medium text-muted-foreground"
