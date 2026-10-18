@@ -10,6 +10,7 @@ import homeCoffee from "@/assets/qless-home-coffee.jpg";
 import cafePhoto from "@/assets/hero-coffee.jpg";
 import { formatClock } from "@/lib/pricing";
 import { resolveLogoUrl } from "@/lib/logo";
+import { useDisplayName } from "@/hooks/use-display-name";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/")({
